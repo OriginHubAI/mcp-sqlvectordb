@@ -3,12 +3,16 @@ import pytest_asyncio
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
 import asyncio
-from mcp_clickhouse.mcp_server import mcp, create_clickhouse_client
+from mcp_server.main import mcp, register_services
+from mcp_server.myscaledb import create_myscale_client
 from dotenv import load_dotenv
 import json
 
 # Load environment variables
 load_dotenv()
+
+# Register all MCP services once at module load time
+register_services()
 
 
 @pytest.fixture(scope="module")
@@ -22,7 +26,7 @@ def event_loop():
 @pytest_asyncio.fixture(scope="module")
 async def setup_test_database():
     """Set up test database and tables before running tests."""
-    client = create_clickhouse_client()
+    client = create_myscale_client()
 
     # Test database and table names
     test_db = "test_mcp_db"
@@ -99,8 +103,9 @@ async def test_list_databases(mcp_server, setup_test_database):
         assert len(result.content) >= 1
         assert isinstance(result.content[0].text, str)
 
-        # Parse the result text (it's a JSON list of database names)
-        databases = json.loads(result.content[0].text)
+        # Parse the result text (it's a JSON object with 'databases' key)
+        result_data = json.loads(result.content[0].text)
+        databases = result_data.get("databases", result_data)  # Support both formats
         assert test_db in databases
         assert "system" in databases  # System database should always exist
 
@@ -232,7 +237,7 @@ async def test_run_select_query_with_join(mcp_server, setup_test_database):
 
     async with Client(mcp_server) as client:
         # Insert related data for join
-        client_direct = create_clickhouse_client()
+        client_direct = create_myscale_client()
         client_direct.command(f"""
             INSERT INTO {test_db}.{test_table2} (event_id, event_type, timestamp) VALUES
             (2001, 'purchase', '2024-01-01 14:00:00')

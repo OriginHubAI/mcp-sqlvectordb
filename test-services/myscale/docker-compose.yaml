@@ -1,0 +1,9 @@
+services:
+  myscaledb:
+    image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mqdb:24.8.8.1-61d35943-release
+    privileged: true
+    network_mode: host
+    environment:
+      - MYSCALE_USER=default
+      - MYSCALE_PASSWORD=
+      - MYSCALE_DB=default
