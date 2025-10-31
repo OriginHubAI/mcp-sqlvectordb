@@ -10,9 +10,9 @@ from starlette.responses import PlainTextResponse
 
 # Support both relative and absolute imports
 try:
-    from .config import get_myscale_config, get_chdb_config, get_mcp_config, TransportType
+    from .config import get_chdb_config, get_mcp_config, TransportType
 except ImportError:
-    from mcp_server.config import get_myscale_config, get_chdb_config, get_mcp_config, TransportType
+    from mcp_server.config import get_chdb_config, get_mcp_config, TransportType
 
 # Configure logging
 logging.basicConfig(
@@ -97,7 +97,7 @@ def main():
     """Start the MCP server."""
     # Register all services
     register_services()
-    
+
     # Get server configuration
     mcp_config = get_mcp_config()
     transport = mcp_config.server_transport
@@ -107,7 +107,9 @@ def main():
     if transport in http_transports:
         # Use the configured bind host (defaults to 127.0.0.1, can be set to 0.0.0.0)
         # and bind port (defaults to 8000)
-        logger.info(f"Starting MCP server, transport={transport}, host={mcp_config.bind_host}, port={mcp_config.bind_port}")
+        logger.info(
+            f"Starting MCP server, transport={transport}, host={mcp_config.bind_host}, port={mcp_config.bind_port}"
+        )
         mcp.run(transport=transport, host=mcp_config.bind_host, port=mcp_config.bind_port)
     else:
         # For stdio transport, no host or port is needed

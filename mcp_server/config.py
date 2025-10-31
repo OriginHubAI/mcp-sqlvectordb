@@ -350,7 +350,9 @@ class MCPServerConfig:
         transport = os.getenv("MCP_SERVER_TRANSPORT", TransportType.STDIO.value).lower()
         if transport not in TransportType.values():
             valid_options = ", ".join(f'"{t}"' for t in TransportType.values())
-            raise ValueError(f"Invalid transport type '{transport}'. Valid options: {valid_options}")
+            raise ValueError(
+                f"Invalid transport type '{transport}'. Valid options: {valid_options}"
+            )
         return transport
 
     @property
@@ -377,7 +379,7 @@ def get_myscale_config() -> MyScaleConfig:
     """
     Gets the singleton instance of MyScaleConfig.
     Instantiates it on the first call.
-    
+
     Returns:
         MyScaleConfig: The MyScaleDB configuration instance
     """
@@ -419,4 +421,3 @@ def get_mcp_config() -> MCPServerConfig:
     if _MCP_CONFIG_INSTANCE is None:
         _MCP_CONFIG_INSTANCE = MCPServerConfig()
     return _MCP_CONFIG_INSTANCE
-

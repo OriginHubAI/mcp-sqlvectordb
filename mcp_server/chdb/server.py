@@ -46,11 +46,11 @@ def create_chdb_client():
     global _chdb_client
     if not get_chdb_config().enabled:
         raise ValueError("chDB is not enabled. Set CHDB_ENABLED=true to enable it.")
-    
+
     # Initialize client if not already initialized
     if _chdb_client is None:
         _chdb_client = _init_chdb_client()
-    
+
     return _chdb_client
 
 
@@ -79,9 +79,9 @@ def execute_chdb_query(query: str):
 
 def run_chdb_select_query(query: str):
     """Run SQL in chDB, an in-process ClickHouse engine.
-    
+
     chDB = In-Process ClickHouse + Direct Query via Table Functions
-    
+
     Key Features:
     1. Table Functions - Query data sources directly without import:
        - Local files: file('path/to/file.csv') or file('data.parquet', 'Parquet')
@@ -89,18 +89,18 @@ def run_chdb_select_query(query: str):
        - S3 storage: s3('s3://bucket/path/file.csv', 'CSV')
        - PostgreSQL: postgresql('host:port', 'database', 'table', 'user', 'password')
        - MySQL: mysql('host:port', 'database', 'table', 'user', 'password')
-    
+
     2. Supported Formats:
        - CSV, TSV, JSON, JSONEachRow
        - Parquet, ORC, Avro
-    
+
     3. Best Practices:
        - Use LIMIT to prevent large result sets (recommend LIMIT 10 by default)
        - Use WHERE to filter and reduce data transfer
        - Use SELECT to specify columns and avoid full table scans
        - Multi-source JOIN: file() JOIN url() JOIN s3()
        - Test connection: DESCRIBE table_function(...)
-    
+
     4. No Data Import Required:
        - Query data in place
        - If no suitable table function exists, use Python to download to temp file and query with file()
@@ -120,9 +120,7 @@ def run_chdb_select_query(query: str):
                 }
             return result
         except concurrent.futures.TimeoutError:
-            logger.warning(
-                f"chDB query timed out after {timeout_secs} seconds: {query}"
-            )
+            logger.warning(f"chDB query timed out after {timeout_secs} seconds: {query}")
             future.cancel()
             return {
                 "status": "error",
@@ -141,7 +139,7 @@ def chdb_initial_prompt() -> str:
 def register_tools(mcp: FastMCP):
     """Register chDB tools to MCP instance."""
     global _chdb_client
-    
+
     _chdb_client = _init_chdb_client()
     if _chdb_client:
         atexit.register(lambda: _chdb_client.close())
@@ -154,4 +152,3 @@ def register_tools(mcp: FastMCP):
     )
     mcp.add_prompt(chdb_prompt)
     logger.info("chDB tools and prompts registered")
-

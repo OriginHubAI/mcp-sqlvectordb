@@ -21,4 +21,3 @@ __all__ = [
     "register_tools",
     "PGVECTOR_PROMPT",
 ]
-

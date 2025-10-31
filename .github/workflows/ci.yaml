@@ -10,24 +10,25 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # not run in svc
+    # services:
+    #   myscaledb:
+    #     image: myscale/myscaledb:1.8.0
+    #     ports:
+    #       - 8123:8123
+    #       - 9000:9000
+    #     env:
+    #       CLICKHOUSE_DB: default
+    #       CLICKHOUSE_USER: default
+    #       CLICKHOUSE_PASSWORD: myscaledb
+    #     options: >-
+    #       --name myscaledb
+    #       --health-cmd "clickhouse-client --query 'SELECT 1'"
+    #       --health-interval 5s
+    #       --health-timeout 10s
+    #       --health-retries 10
+    #       --health-start-period 10s
     services:
-      myscaledb:
-        image: myscale/myscaledb:1.8.0
-        ports:
-          - 9000:9000
-          - 8123:8123
-        env:
-          CLICKHOUSE_DB: default
-          CLICKHOUSE_USER: default
-          CLICKHOUSE_PASSWORD: myscaledb
-        options: >-
-          --health-cmd "clickhouse-client --query 'SELECT 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        volumes:
-          - ./ci-configs/myscaledb_listen.xml:/etc/clickhouse-server/users.d/listen.xml # allow all networks to access MyScaleDB
-      
       postgres:
         image: pgvector/pgvector:pg16
         ports:
@@ -37,14 +38,37 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: vectordb
         options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "pg_isready -U postgres -d vectordb"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 10s
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup MyScaleDB
+        run: |
+          echo "<clickhouse><users><default><networks><ip>::/0</ip><ip>0.0.0.0/0</ip></networks></default></users></clickhouse>" > listen.xml
+          docker run -itd --rm \
+              --name myscaledb \
+              -p 8123:8123 -p 9000:9000 \
+              -e CLICKHOUSE_DB=default \
+              -e CLICKHOUSE_USER=default \
+              -e CLICKHOUSE_PASSWORD=myscaledb \
+              -v $(pwd)/listen.xml:/etc/clickhouse-server/users.d/listen.xml \
+              myscale/myscaledb:1.8.0
+
+      - name: Verify services are ready
+        run: |
+          echo "Checking MyScaleDB..."
+          curl -f http://localhost:8123/?query=SELECT%201 || (echo "MyScaleDB not responding" && exit 1)
+          echo "MyScaleDB is ready!"
+          
+          echo "Checking PostgreSQL..."
+          pg_isready -h localhost -U postgres -d vectordb || (echo "PostgreSQL not responding" && exit 1)
+          echo "PostgreSQL is ready!"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -53,7 +77,7 @@ jobs:
         run: uv python install 3.13
 
       - name: Install Project
-        run: uv sync --all-extras --dev
+        run: uv sync --dev
 
       - name: Setup test databases
         env:

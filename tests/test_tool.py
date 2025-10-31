@@ -1,10 +1,14 @@
 import unittest
-import json
 
 from dotenv import load_dotenv
 from fastmcp.exceptions import ToolError
 
-from mcp_server.myscaledb import create_myscale_client, list_databases, list_tables, run_select_query
+from mcp_server.myscaledb import (
+    create_myscale_client,
+    list_databases,
+    list_tables,
+    run_select_query,
+)
 
 load_dotenv()
 

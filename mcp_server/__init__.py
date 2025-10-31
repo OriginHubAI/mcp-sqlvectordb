@@ -21,6 +21,7 @@ from . import pgvector
 if os.getenv("MCP_TRUSTSTORE_DISABLE", None) != "1":
     try:
         import truststore
+
         truststore.inject_into_ssl()
     except Exception:
         pass

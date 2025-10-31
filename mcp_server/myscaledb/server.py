@@ -3,7 +3,7 @@
 import logging
 import concurrent.futures
 import atexit
-from typing import Optional, List, Any
+from typing import Optional, List
 from dataclasses import dataclass, field, asdict
 
 import clickhouse_connect
@@ -128,21 +128,18 @@ def list_databases():
         databases = [result]
 
     logger.info(f"Found {len(databases)} databases")
-    return {
-        "databases": databases,
-        "count": len(databases)
-    }
+    return {"databases": databases, "count": len(databases)}
 
 
 def list_tables(database: str, like: Optional[str] = None, not_like: Optional[str] = None):
     """List available MyScaleDB tables in a database, including schema, comment, row count, and column count.
-    
+
     Returns detailed table information including:
     - Column types (Array(Float32) indicates vector columns)
     - Table engine and sorting keys
     - Row counts and storage statistics
     - Column comments and constraints
-    
+
     Use this to identify vector columns before creating vector indexes.
     Vector columns are typically Array(Float32) or Array(Float64) types.
     """
@@ -190,23 +187,23 @@ def execute_query(query: str):
 
 def run_similarity_select_query(query: str):
     """Run a SELECT query in a MyScaleDB database.
-    
+
     MyScaleDB = ClickHouse + Vector Search
-    
+
     Available Query Functions:
     1. Vector Search:
        - distance(embedding, [0.1, 0.2, 0.3]): Calculate vector similarity
        - Supported metrics: Cosine, L2, IP (Inner Product)
        - Example: SELECT id, distance(embedding, [0.1, 0.2, 0.3]) AS dist FROM tbl ORDER BY dist LIMIT 10
-    
+
     2. Full Text Search:
        - TextSearch(text_col, 'search query'): Full text search with score
        - Example: SELECT id, TextSearch(text, 'machine learning') AS score FROM tbl ORDER BY score DESC LIMIT 10
-    
+
     3. Hybrid Search:
        - HybridSearch(embedding, text_col, [0.1, 0.2, 0.3], 'search query'): Combine vector and text search
        - Example: SELECT id, HybridSearch(embedding, text, [0.1, 0.2, 0.3], 'AI') AS score FROM tbl ORDER BY score DESC LIMIT 10
-    
+
     Best Practices:
     - Always use LIMIT to prevent large result sets
     - Combine filters with vector/text search for better results
@@ -238,18 +235,19 @@ def run_similarity_select_query(query: str):
         logger.error(f"Unexpected error in run_similarity_select_query: {str(e)}")
         raise RuntimeError(f"Unexpected error during query execution: {str(e)}")
 
+
 def run_select_query(query: str):
     """Run a standard SELECT query in a MyScaleDB database.
-    
+
     Use this tool for regular SQL queries without vector/text search functions.
     For similarity search, use run_similarity_select_query instead.
-    
+
     Suitable for:
     - Data filtering and aggregation: SELECT ... WHERE ... GROUP BY ...
     - Table joins: SELECT ... FROM t1 JOIN t2 ON ...
     - Statistical analysis: SELECT COUNT(*), AVG(col), SUM(col) ...
     - Data exploration: SELECT * FROM table LIMIT 10
-    
+
     Best Practices:
     - Always use LIMIT to prevent large result sets
     - Always use arraySlice to silice the vector array result to avoid massive data transfer
@@ -257,7 +255,7 @@ def run_select_query(query: str):
     - Use ORDER BY to sort results
     - Use GROUP BY for aggregation queries
     - Use appropriate JOIN types for multi-table queries
-    
+
     Note: This tool does NOT support vector search functions (distance, TextSearch, HybridSearch).
     Use run_similarity_select_query for those queries.
     """
@@ -287,9 +285,11 @@ def run_select_query(query: str):
         logger.error(f"Unexpected error in run_select_query: {str(e)}")
         raise RuntimeError(f"Unexpected error during query execution: {str(e)}")
 
+
 def myscaledb_initial_prompt() -> str:
     """This prompt helps users understand how to interact with MyScaleDB and perform operations."""
     return MYSCALEDB_PROMPT
+
 
 def register_tools(mcp: FastMCP):
     """Register MyScaleDB tools to MCP instance."""

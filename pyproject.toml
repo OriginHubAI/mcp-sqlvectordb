@@ -22,7 +22,7 @@ mcp-sqlvectordb = "mcp_server.main:main"
 [project.urls]
 Home = "https://github.com/OriginHubAI/mcp-sqlvectordb"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "ruff",
     "pytest",

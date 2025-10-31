@@ -15,4 +15,3 @@ __all__ = [
     "register_tools",
     "CHDB_PROMPT",
 ]
-
