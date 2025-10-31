@@ -55,22 +55,25 @@ jobs:
 
     - name: Setup MyScaleDB
       run: |
-        echo "<clickhouse><users><default><networks><ip>::/0</ip><ip>0.0.0.0/0</ip></networks></default></users></clickhouse>" > listen.xml
-        docker run -itd --rm \
+        docker run -d \
             --name myscaledb \
-            -p 8123:8123 -p 9000:9000 \
-            -e CLICKHOUSE_DB=default \
-            -e CLICKHOUSE_USER=default \
-            -e CLICKHOUSE_PASSWORD=myscaledb \
-            -v $(pwd)/listen.xml:/etc/clickhouse-server/users.d/listen.xml \
+            --net=host \
             myscale/myscaledb:1.8.0
+        # wait for MyScaleDB to start
+        echo "Waiting for MyScaleDB to start..."
+        for i in {1..30}; do
+          if curl -s http://127.0.0.1:8123 | grep -q "Ok."; then
+            echo "MyScaleDB is ready!"
+            break
+          fi
+          echo "Attempt $i/30: MyScaleDB not ready yet, waiting..."
+          sleep 2
+        done
+        # execute select Sql
+        curl -s http://127.0.0.1:8123/?query=SELECT%201
 
     - name: Verify services are ready
       run: |
-        echo "Checking MyScaleDB..."
-        curl -f http://localhost:8123/?query=SELECT%201 || (echo "MyScaleDB not responding" && exit 1)
-        echo "MyScaleDB is ready!"
-        
         echo "Checking PostgreSQL..."
         pg_isready -h localhost -U postgres -d vectordb || (echo "PostgreSQL not responding" && exit 1)
         echo "PostgreSQL is ready!"
@@ -108,7 +111,7 @@ jobs:
         MYSCALE_HOST: localhost
         MYSCALE_PORT: 8123
         MYSCALE_USER: default
-        MYSCALE_PASSWORD: clickhouse
+        MYSCALE_PASSWORD: ""
         MYSCALE_SECURE: "false"
         MYSCALE_VERIFY: "false"
         
@@ -131,7 +134,7 @@ jobs:
         MYSCALE_HOST: localhost
         MYSCALE_PORT: 8123
         MYSCALE_USER: default
-        MYSCALE_PASSWORD: clickhouse
+        MYSCALE_PASSWORD: ""
         MYSCALE_SECURE: "false"
         MYSCALE_VERIFY: "false"
         PGVECTOR_HOST: localhost

@@ -2,7 +2,7 @@ services:
   clickhouse-mcp:
     image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mcp-sqlvectordb:0.0.1
     ports:
-      - "8000:8000"
+      - "4200:4200"
     environment:
       - MYSCALE_HOST=127.0.0.1
       - MYSCALE_USER=default
@@ -13,4 +13,4 @@ services:
       - MYSCALE_DATABASE=default
       - MCP_SERVER_TRANSPORT=http
       - MCP_BIND_HOST=0.0.0.0
-      - MCP_BIND_PORT=8000
+      - MCP_BIND_PORT=4200
