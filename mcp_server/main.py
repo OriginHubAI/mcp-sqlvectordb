@@ -10,9 +10,9 @@ from starlette.responses import PlainTextResponse
 
 # Support both relative and absolute imports
 try:
-    from .config import get_chdb_config, get_mcp_config, TransportType
+    from .config import get_mcp_config, TransportType
 except ImportError:
-    from mcp_server.config import get_chdb_config, get_mcp_config, TransportType
+    from mcp_server.config import get_mcp_config, TransportType
 
 # Configure logging
 logging.basicConfig(
@@ -54,11 +54,15 @@ async def health_check(request: Request) -> PlainTextResponse:
                 from mcp_server.pgvector import create_pgvector_client
             client = create_pgvector_client()
             pgvector_version = client.server_version
-        
-        return PlainTextResponse(f"OK - Connected to MyScaleDB {myscaledb_version} and pgvector {pgvector_version}")
+
+        return PlainTextResponse(
+            f"OK - Connected to MyScaleDB {myscaledb_version} and pgvector {pgvector_version}"
+        )
     except Exception as e:
         # Return 503 Service Unavailable if we can't connect to MyScaleDB or pgvector
-        return PlainTextResponse(f"ERROR - Cannot connect to MyScaleDB or pgvector: {str(e)}", status_code=503)
+        return PlainTextResponse(
+            f"ERROR - Cannot connect to MyScaleDB or pgvector: {str(e)}", status_code=503
+        )
 
 
 def register_services():
