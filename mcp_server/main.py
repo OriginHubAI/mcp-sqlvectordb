@@ -37,30 +37,28 @@ async def health_check(request: Request) -> PlainTextResponse:
     try:
         # Check if MyScaleDB is enabled by trying to create config
         myscale_enabled = os.getenv("MYSCALE_ENABLED", "true").lower() == "true"
-
-        if not myscale_enabled:
-            # If MyScaleDB is disabled, check chDB status
-            chdb_config = get_chdb_config()
-            if chdb_config.enabled:
-                return PlainTextResponse("OK - MCP server running with chDB enabled")
-            else:
-                # Both MyScaleDB and chDB are disabled - this is an error
-                return PlainTextResponse(
-                    "ERROR - Both MyScaleDB and chDB are disabled. At least one must be enabled.",
-                    status_code=503,
-                )
-
-        # Try to create a client connection to verify MyScaleDB connectivity
-        try:
-            from .myscaledb import create_myscale_client
-        except ImportError:
-            from mcp_server.myscaledb import create_myscale_client
-        client = create_myscale_client()
-        version = client.server_version
-        return PlainTextResponse(f"OK - Connected to MyScaleDB {version}")
+        pgvector_enabled = os.getenv("PGVECTOR_ENABLED", "false").lower() == "true"
+        if myscale_enabled:
+            # Try to create a client connection to verify MyScaleDB connectivity
+            try:
+                from .myscaledb import create_myscale_client
+            except ImportError:
+                from mcp_server.myscaledb import create_myscale_client
+            client = create_myscale_client()
+            myscaledb_version = client.server_version
+        if pgvector_enabled:
+            # Try to create a client connection to verify pgvector connectivity
+            try:
+                from .pgvector import create_pgvector_client
+            except ImportError:
+                from mcp_server.pgvector import create_pgvector_client
+            client = create_pgvector_client()
+            pgvector_version = client.server_version
+        
+        return PlainTextResponse(f"OK - Connected to MyScaleDB {myscaledb_version} and pgvector {pgvector_version}")
     except Exception as e:
-        # Return 503 Service Unavailable if we can't connect to MyScaleDB
-        return PlainTextResponse(f"ERROR - Cannot connect to MyScaleDB: {str(e)}", status_code=503)
+        # Return 503 Service Unavailable if we can't connect to MyScaleDB or pgvector
+        return PlainTextResponse(f"ERROR - Cannot connect to MyScaleDB or pgvector: {str(e)}", status_code=503)
 
 
 def register_services():
