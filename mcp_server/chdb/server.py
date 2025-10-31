@@ -13,7 +13,7 @@ from fastmcp.prompts import Prompt
 from ..config import get_chdb_config, get_mcp_config
 from .prompts import CHDB_PROMPT
 
-logger = logging.getLogger("mcp-clickhouse.chdb")
+logger = logging.getLogger("mcp-chdb")
 
 # Query executor
 QUERY_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10)

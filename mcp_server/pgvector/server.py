@@ -12,7 +12,7 @@ from fastmcp.exceptions import ToolError
 from ..config import get_pgvector_config, get_mcp_config
 from .prompts import PGVECTOR_PROMPT
 
-logger = logging.getLogger("mcp-clickhouse.pgvector")
+logger = logging.getLogger("mcp-pgvector")
 
 # Query executor
 QUERY_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10)

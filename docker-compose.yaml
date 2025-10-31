@@ -1,16 +1,16 @@
 services:
   clickhouse-mcp:
-    image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mcp-myscale:0.0.2
+    image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mcp-sqlvectordb:0.0.1
     ports:
       - "8000:8000"
     environment:
-      - CLICKHOUSE_HOST=127.0.0.1
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=
-      - CLICKHOUSE_PORT=8123
-      - CLICKHOUSE_SECURE=false
-      - CLICKHOUSE_VERIFY=false
-      - CLICKHOUSE_DATABASE=default
+      - MYSCALE_HOST=127.0.0.1
+      - MYSCALE_USER=default
+      - MYSCALE_PASSWORD=
+      - MYSCALE_PORT=8123
+      - MYSCALE_SECURE=false
+      - MYSCALE_VERIFY=false
+      - MYSCALE_DATABASE=default
       - MCP_SERVER_TRANSPORT=http
       - MCP_BIND_HOST=0.0.0.0
       - MCP_BIND_PORT=8000

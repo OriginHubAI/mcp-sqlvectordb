@@ -18,13 +18,13 @@ except ImportError:
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger("mcp-myscaledb")
+logger = logging.getLogger("mcp-sqlvectordb")
 
 # Load environment variables
 load_dotenv()
 
 # Create MCP instance
-MCP_SERVER_NAME = "mcp-myscaledb"
+MCP_SERVER_NAME = "mcp-sqlvectordb"
 mcp = FastMCP(name=MCP_SERVER_NAME)
 
 

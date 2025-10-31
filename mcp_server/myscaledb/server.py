@@ -179,8 +179,8 @@ def execute_query(query: str):
     """Execute MyScaleDB query."""
     client = create_myscale_client()
     try:
-        read_only = get_readonly_setting(client)
-        res = client.query(query, settings={"readonly": read_only})
+        # read_only = get_readonly_setting(client)
+        res = client.query(query, settings={"readonly": 1})
         logger.info(f"Query returned {len(res.result_rows)} rows")
         return {"columns": res.column_names, "rows": res.result_rows}
     except Exception as err:
@@ -252,6 +252,7 @@ def run_select_query(query: str):
     
     Best Practices:
     - Always use LIMIT to prevent large result sets
+    - Always use arraySlice to silice the vector array result to avoid massive data transfer
     - Use WHERE to filter data before aggregation
     - Use ORDER BY to sort results
     - Use GROUP BY for aggregation queries
@@ -295,7 +296,10 @@ def register_tools(mcp: FastMCP):
     mcp.add_tool(Tool.from_function(list_databases))
     mcp.add_tool(Tool.from_function(list_tables))
     mcp.add_tool(Tool.from_function(run_select_query))
-    mcp.add_tool(Tool.from_function(run_similarity_select_query))
+    # [WIP] Add similarity search tool, currently many llm cannot handle myscale vector similarity search sql
+    # so we need to train a model to generate the MyScaleDB vector similarity search sql.
+    # For now, we disable the similarity search tool.
+    # mcp.add_tool(Tool.from_function(run_similarity_select_query))
     myscaledb_prompt = Prompt.from_function(
         myscaledb_initial_prompt,
         name="myscaledb_initial_prompt",

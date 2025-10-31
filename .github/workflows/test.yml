@@ -30,6 +30,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        volumes:
+          - ./ci-configs/myscaledb_listen.xml:/etc/clickhouse-server/users.d/listen.xml # allow all networks to access MyScaleDB
       
       # PostgreSQL with pgvector
       postgres:
