@@ -17,7 +17,7 @@ jobs:
     # not run in svc
     # services:
     #   myscaledb:
-    #     image: myscale/myscaledb:1.8.0
+    #     image: adex0225/myscaledb:2.0.0
     #     ports:
     #       - 8123:8123
     #       - 9000:9000
@@ -58,7 +58,7 @@ jobs:
         docker run -d \
             --name myscaledb \
             --net=host \
-            myscale/myscaledb:1.8.0
+            adex0225/myscaledb:2.0.0
         # wait for MyScaleDB to start
         echo "Waiting for MyScaleDB to start..."
         for i in {1..30}; do
