@@ -107,7 +107,7 @@ async def test_list_databases(mcp_server, setup_test_database):
         result_data = json.loads(result.content[0].text)
         databases = result_data.get("databases", result_data)  # Support both formats
         assert test_db in databases
-        assert "system" in databases  # System database should always exist
+        assert "default" in databases  # Default database should always exist
 
 
 @pytest.mark.asyncio

@@ -1,0 +1,174 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "mcp-sqlvdb"
+  namespace: "mcp-sqlvdb"
+spec:
+  defaults:
+    templates:
+      serviceTemplate: service-template
+      replicaServiceTemplate: replica-service-template
+      podTemplate: pod-template
+      dataVolumeClaimTemplate: data-volume-claim-template
+      logVolumeClaimTemplate: log-volume-claim-template
+
+  configuration:
+    settings:
+      allow_experimental_transactions: 42
+      logger/level: information
+      logger/size: 2000M
+      logger/count: 100
+      vector_index_cache_path: /var/lib/clickhouse/vector_index_cache
+      mark_cache_size: 209715200
+      uncompressed_cache_size: 314572800
+      merge_tree/number_of_free_entries_in_pool_to_execute_mutation: 2
+      merge_tree/number_of_free_entries_in_pool_to_lower_max_size_of_merge: 2
+      merge_tree/max_parts_to_merge_at_once: 10
+      merge_tree/merge_max_block_size: 1024
+      merge_tree/default_mstg_disk_mode: 0
+      merge_tree/max_bytes_to_merge_at_max_space_in_pool: 5368709120
+      merge_tree/simple_merge_selector_base: 1.2
+      max_concurrent_queries: 10000
+      merge_tree/min_rows_to_build_vector_index: 0
+      query_log/database: system
+      query_log/table: query_log
+      query_log/flush_interval_milliseconds: 7500
+      vector_index_event_log/database: system
+      vector_index_event_log/table: vector_index_event_log
+      vector_index_event_log/flush_interval_milliseconds: 7500
+      trace_log/database: system
+      trace_log/table: trace_log
+      trace_log/flush_interval_milliseconds: 7500
+    users:
+      default/networks/ip:
+        - "127.0.0.1"
+        # - "::1"
+        - "0.0.0.0/0"
+      default/password: ""
+    profiles:
+      default/allow_experimental_lightweight_delete: true
+      default/background_pool_size: 4
+      default/background_merges_mutations_concurrency_ratio: 2
+      default/enable_rough_filter_setting: true
+      default/parallel_reading_prefilter_option: 0
+      default/max_memory_usage: 8000000000
+      default/min_insert_block_size_bytes: 33554432
+      default/mutations_sync: 1
+      default/log_query_threads: 0
+      default/log_queries_cut_to_length: 100
+#      default/log_queries_min_type: QUERY_FINISH
+    clusters:
+      - name: "single-node"
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+    files:
+      z_log_disable.xml: |-
+        <?xml version="1.0"?>
+        <clickhouse>
+            <asynchronous_metric_log remove="1"/>
+            <metric_log remove="1"/>
+            <session_log remove="1"/>
+            <text_log remove="1" />
+            <query_views_log remove="1" />
+            <query_thread_log remove="1" />
+        </clickhouse>
+
+  templates:
+    serviceTemplates:
+      - name: service-template
+        metadata:
+          annotations:
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: "internet"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-switch: "off"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-flag: "off"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-type: "http"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-uri: "/ping"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-healthy-threshold: "4"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-unhealthy-threshold: "4"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-timeout: "10"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-interval: "3"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-protocol-port: "http:8123"
+        spec:
+          type: LoadBalancer
+          ports:
+            - name: http
+              port: 8123
+              protocol: TCP
+              targetPort: http
+            - name: tcp
+              port: 9000
+              protocol: TCP
+              targetPort: tcp
+      - name: replica-service-template
+        spec:
+          type: ClusterIP
+          clusterIP: None
+          ports:
+            - name: http
+              port: 8123
+              protocol: TCP
+              targetPort: http
+            - name: tcp
+              port: 9000
+              protocol: TCP
+              targetPort: tcp
+            - name: interserver
+              port: 9009
+              protocol: TCP
+              targetPort: interserver
+            - name: metrics
+              port: 9363
+              protocol: TCP
+              targetPort: metrics
+    podTemplates:
+      - name: pod-template
+        spec:
+          imagePullSecrets:
+            - name: aliyun-registry-secret
+          containers:
+            - name: clickhouse
+              image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mqdb:24.8.8.1-65823d55-release
+              securityContext:
+                privileged: true
+              command:
+                - bash
+                - -c
+                - ulimit -l unlimited && /entrypoint.sh
+              ports:
+                - containerPort: 9000
+                  name: tcp
+                  protocol: TCP
+                - containerPort: 8123
+                  name: http
+                  protocol: TCP
+                - containerPort: 9009
+                  name: interserver
+                  protocol: TCP
+                - containerPort: 9363
+                  name: metrics
+                  protocol: TCP
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 4Gi
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+    volumeClaimTemplates:
+      - name: data-volume-claim-template
+        spec:
+          storageClassName: alicloud-disk-essd
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 100Gi
+      - name: log-volume-claim-template
+        spec:
+          storageClassName: alicloud-disk-essd
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi

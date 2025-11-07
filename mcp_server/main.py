@@ -38,6 +38,7 @@ async def health_check(request: Request) -> PlainTextResponse:
         # Check if MyScaleDB is enabled by trying to create config
         myscale_enabled = os.getenv("MYSCALE_ENABLED", "true").lower() == "true"
         pgvector_enabled = os.getenv("PGVECTOR_ENABLED", "false").lower() == "true"
+        response = "OK - "
         if myscale_enabled:
             # Try to create a client connection to verify MyScaleDB connectivity
             try:
@@ -46,6 +47,7 @@ async def health_check(request: Request) -> PlainTextResponse:
                 from mcp_server.myscaledb import create_myscale_client
             client = create_myscale_client()
             myscaledb_version = client.server_version
+            response += f"Connected to MyScaleDB {myscaledb_version}"
         if pgvector_enabled:
             # Try to create a client connection to verify pgvector connectivity
             try:
@@ -54,10 +56,8 @@ async def health_check(request: Request) -> PlainTextResponse:
                 from mcp_server.pgvector import create_pgvector_client
             client = create_pgvector_client()
             pgvector_version = client.server_version
-
-        return PlainTextResponse(
-            f"OK - Connected to MyScaleDB {myscaledb_version} and pgvector {pgvector_version}"
-        )
+            response += f"Connected to pgvector {pgvector_version}"
+        return PlainTextResponse(response)
     except Exception as e:
         # Return 503 Service Unavailable if we can't connect to MyScaleDB or pgvector
         return PlainTextResponse(
