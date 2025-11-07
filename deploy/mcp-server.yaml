@@ -8,7 +8,7 @@ data:
   MYSCALE_ENABLED: "true"
   MYSCALE_HOST: "chi-mcp-sqlvdb-single-node-0-0-0.chi-mcp-sqlvdb-single-node-0-0.mcp-sqlvdb.svc.cluster.local"
   MYSCALE_USER: "default"
-  MYSCALE_PASSWORD: "myscale#EDC"
+  MYSCALE_PASSWORD: ""
   MYSCALE_PORT: "8123"
   MYSCALE_SECURE: "false"
   MYSCALE_VERIFY: "false"
