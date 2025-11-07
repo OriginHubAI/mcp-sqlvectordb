@@ -1,0 +1,51 @@
+api:
+  extraEnv:
+  - name: VECTOR_STORE
+    value: "myscale"
+  persistence:
+    enabled: true
+    storageClass: alicloud-disk-essd
+    accessMode: ReadWriteMany
+    size: 10Gi
+
+myscale:
+  enable: false
+
+externalMyscale:
+  enable: true
+  host: "chi-mcp-sqlvdb-single-node-0-0-0.chi-mcp-sqlvdb-single-node-0-0.mcp-sqlvdb.svc.cluster.local"
+  port: 8123
+  user: "default"
+  password: "myscale#EDC"
+  database: "default"
+
+image:
+  api:
+    repository: langgenius/dify-api
+    tag: "1.9.2"
+    pullPolicy: IfNotPresent
+  web:
+    repository: langgenius/dify-web
+    tag: "1.9.2"
+    pullPolicy: IfNotPresent
+  sandbox:
+    repository: langgenius/dify-sandbox
+    tag: "1.9.2"
+    pullPolicy: IfNotPresent
+  proxy:
+    repository: langgenius/nginx
+    tag: "1.9.2"
+    pullPolicy: IfNotPresent
+  ssrfProxy:
+    repository: langgenius/squid
+    tag: "1.9.2"
+    pullPolicy: IfNotPresent
+  pluginDaemon:
+    repository: langgenius/dify-plugin-daemon
+    tag: "1.9.2"
+    pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  className: "nginx"
+

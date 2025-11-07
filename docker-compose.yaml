@@ -1,0 +1,27 @@
+services:
+  mcp-sqlvectordb:
+    image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mcp-sqlvectordb:0.0.1
+    ports:
+      - "4200:4200"
+    environment:
+      # myscaledb
+      - MYSCALE_ENABLED=true
+      - MYSCALE_HOST=127.0.0.1
+      - MYSCALE_USER=default
+      - MYSCALE_PASSWORD=
+      - MYSCALE_PORT=8123
+      - MYSCALE_SECURE=false
+      - MYSCALE_VERIFY=false
+      - MYSCALE_DATABASE=default
+      # pgvector
+      - PGVECTOR_ENABLED=true
+      - PGVECTOR_HOST=127.0.0.1
+      - PGVECTOR_PORT=5432
+      - PGVECTOR_USER=postgres
+      - PGVECTOR_PASSWORD=postgres
+      - PGVECTOR_DATABASE=vectordb
+      - PGVECTOR_SSLMODE=disable
+      # mcp server
+      - MCP_SERVER_TRANSPORT=http
+      - MCP_BIND_HOST=0.0.0.0
+      - MCP_BIND_PORT=4200

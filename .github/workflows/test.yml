@@ -1,0 +1,170 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    
+    # not run in svc
+    # services:
+    #   myscaledb:
+    #     image: adex0225/myscaledb:2.0.0
+    #     ports:
+    #       - 8123:8123
+    #       - 9000:9000
+    #     env:
+    #       CLICKHOUSE_DB: default
+    #       CLICKHOUSE_USER: default
+    #       CLICKHOUSE_PASSWORD: myscaledb
+    #     options: >-
+    #       --name myscaledb
+    #       --health-cmd "clickhouse-client --query 'SELECT 1'"
+    #       --health-interval 5s
+    #       --health-timeout 10s
+    #       --health-retries 10
+    #       --health-start-period 10s
+    
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vectordb
+        options: >-
+          --health-cmd "pg_isready -U postgres -d vectordb"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 10s
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MyScaleDB
+      run: |
+        docker run -d \
+            --name myscaledb \
+            --net=host \
+            adex0225/myscaledb:2.0.0
+        # wait for MyScaleDB to start
+        echo "Waiting for MyScaleDB to start..."
+        for i in {1..30}; do
+          if curl -s http://127.0.0.1:8123 | grep -q "Ok."; then
+            echo "MyScaleDB is ready!"
+            break
+          fi
+          echo "Attempt $i/30: MyScaleDB not ready yet, waiting..."
+          sleep 2
+        done
+        # execute select Sql
+        curl -s http://127.0.0.1:8123/?query=SELECT%201
+
+    - name: Verify services are ready
+      run: |
+        echo "Checking PostgreSQL..."
+        pg_isready -h localhost -U postgres -d vectordb || (echo "PostgreSQL not responding" && exit 1)
+        echo "PostgreSQL is ready!"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: uv sync --dev
+
+    - name: Setup test databases
+      env:
+        PGPASSWORD: postgres
+      run: |
+        # Wait for services to be ready
+        echo "Waiting for services to be ready..."
+        sleep 5
+        
+        # Setup PostgreSQL with pgvector extension
+        psql -h localhost -U postgres -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        
+        # Test MyScaleDB connection
+        curl http://localhost:8123/?query=SELECT%201
+
+    - name: Run linter
+      run: |
+        uv run ruff check .
+
+    - name: Run tests
+      env:
+        # MyScaleDB configuration
+        MYSCALE_HOST: localhost
+        MYSCALE_PORT: 8123
+        MYSCALE_USER: default
+        MYSCALE_PASSWORD: ""
+        MYSCALE_SECURE: "false"
+        MYSCALE_VERIFY: "false"
+        
+        # pgvector configuration
+        PGVECTOR_HOST: localhost
+        PGVECTOR_PORT: 5432
+        PGVECTOR_USER: postgres
+        PGVECTOR_PASSWORD: postgres
+        PGVECTOR_DATABASE: vectordb
+        PGVECTOR_SSLMODE: disable
+        
+        # chDB configuration (in-memory for tests)
+        CHDB_ENABLED: "true"
+        CHDB_DATA_PATH: ":memory:"
+      run: |
+        uv run pytest tests/ -v --tb=short
+
+    - name: Run specific test suites
+      env:
+        MYSCALE_HOST: localhost
+        MYSCALE_PORT: 8123
+        MYSCALE_USER: default
+        MYSCALE_PASSWORD: ""
+        MYSCALE_SECURE: "false"
+        MYSCALE_VERIFY: "false"
+        PGVECTOR_HOST: localhost
+        PGVECTOR_PORT: 5432
+        PGVECTOR_USER: postgres
+        PGVECTOR_PASSWORD: postgres
+        PGVECTOR_DATABASE: vectordb
+        PGVECTOR_SSLMODE: disable
+        CHDB_ENABLED: "true"
+        CHDB_DATA_PATH: ":memory:"
+      run: |
+        echo "Running MyScaleDB tests..."
+        uv run pytest tests/test_tool.py -v
+        
+        echo "Running chDB tests..."
+        uv run pytest tests/test_chdb_tool.py -v
+        
+        echo "Running pgvector tests..."
+        uv run pytest tests/test_pgvector_tool.py -v
+        
+        echo "Running config tests..."
+        uv run pytest tests/test_config_interface.py -v
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          .pytest_cache/
+          *.log
+        retention-days: 7
+
