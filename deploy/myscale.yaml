@@ -44,7 +44,7 @@ spec:
         - "127.0.0.1"
         # - "::1"
         - "0.0.0.0/0"
-      default/password: "myscale#EDC"
+      default/password: ""
     profiles:
       default/allow_experimental_lightweight_delete: true
       default/background_pool_size: 4
