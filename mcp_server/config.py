@@ -368,11 +368,30 @@ class MCPServerConfig:
         return int(os.getenv("MCP_QUERY_TIMEOUT", "30"))
 
 
+@dataclass
+class TextToVecSQLConfig:
+    """Text to Vector SQL configuration."""
+
+    def __init__(self):
+        """Initialize configuration from environment variables."""
+        if self.enabled:
+            self._validate_required_vars()
+
+    @property
+    def enabled(self) -> bool:
+        """Get whether Text to Vector SQL is enabled."""
+        return os.getenv("TEXT_TO_VEC_SQL_ENABLED", "false").lower() == "true"
+
+    def get_text_to_vec_sql_config(self) -> dict:
+        """Get configuration dictionary for Text to Vector SQL client."""
+        return {}
+
 # Global instance placeholders for the singleton pattern
 _MYSCALE_CONFIG_INSTANCE = None
 _CHDB_CONFIG_INSTANCE = None
 _PGVECTOR_CONFIG_INSTANCE = None
 _MCP_CONFIG_INSTANCE = None
+_TEXT_TO_VEC_SQL_CONFIG_INSTANCE = None
 
 
 def get_myscale_config() -> MyScaleConfig:
@@ -421,3 +440,11 @@ def get_mcp_config() -> MCPServerConfig:
     if _MCP_CONFIG_INSTANCE is None:
         _MCP_CONFIG_INSTANCE = MCPServerConfig()
     return _MCP_CONFIG_INSTANCE
+
+
+def get_text_to_vec_sql_config() -> TextToVecSQLConfig:
+    """Gets the singleton instance of TextToVecSQLConfig."""
+    global _TEXT_TO_VEC_SQL_CONFIG_INSTANCE
+    if _TEXT_TO_VEC_SQL_CONFIG_INSTANCE is None:
+        _TEXT_TO_VEC_SQL_CONFIG_INSTANCE = TextToVecSQLConfig()
+    return _TEXT_TO_VEC_SQL_CONFIG_INSTANCE

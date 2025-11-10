@@ -13,6 +13,7 @@ from fastmcp.tools import Tool
 from fastmcp.exceptions import ToolError
 from .prompts import MYSCALEDB_PROMPT
 from fastmcp.prompts import Prompt
+from ..common_utils import get_text_to_vec_sql_instance
 
 from ..config import get_myscale_config, get_mcp_config
 
@@ -185,6 +186,53 @@ def execute_query(query: str):
     except Exception as err:
         logger.error(f"Error executing query: {err}")
         raise ToolError(f"Query execution failed: {str(err)}")
+
+def run_text_to_vec_sql_query(text: str):
+    """Run a text to vector SQL query.
+
+    Execute a text-to-SQL query with semantic search capabilities using your trained model. Use this tool when:
+    - The query involves semantic/similarity matching on text content
+    - User describes concepts in natural language that need fuzzy matching
+    - Query requires embedding-based approximate nearest neighbor search
+    - Looking for content 'similar to' or 'about' something
+    
+    This tool automatically converts text inputs to embeddings for semantic search and supports extended SQL syntax for similarity operations.
+    
+    Example use cases:
+    - 'Find products similar to \"wireless headphones with noise cancellation\"'
+    - 'Search documents about climate change'
+    - 'Show me reviews that mention comfort and durability'
+    - 'Find users whose bio is similar to \"software engineer interested in AI\"'
+    
+    Use this INSTEAD of run_select_sql when:
+    - User query contains phrases like: 'similar to', 'about', 'related to', 'like', 'describes'
+    - Exact keyword matching would miss semantically relevant results
+    - Need to match on meaning rather than exact text
+    """
+    logger.info(f"Executing text to vector SQL query: {text}")
+    text_to_vec_sql = get_text_to_vec_sql_instance()
+    query = text_to_vec_sql.generate_vec_sql_from_text(text, "myscale")
+    try:
+        future = QUERY_EXECUTOR.submit(execute_query, query)
+        try:
+            timeout_secs = get_mcp_config().query_timeout
+            result = future.result(timeout=timeout_secs)
+            if isinstance(result, dict) and "error" in result:
+                logger.warning(f"Query failed: {result['error']}")
+                return {
+                    "status": "error",
+                    "message": f"Query failed: {result['error']}",
+                }
+            return result
+        except concurrent.futures.TimeoutError:
+            logger.warning(f"Query timed out after {timeout_secs} seconds: {text}")
+            future.cancel()
+            raise ToolError(f"Query timed out after {timeout_secs} seconds")
+    except ToolError:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in run_text_to_vec_sql_query: {str(e)}")
+        raise RuntimeError(f"Unexpected error during query execution: {e}")
 
 
 def run_similarity_select_query(query: str):
