@@ -380,18 +380,24 @@ class TextToVecSQLConfig:
     @property
     def enabled(self) -> bool:
         """Get whether Text to Vector SQL is enabled."""
-        return os.getenv("TEXT_TO_VEC_SQL_ENABLED", "false").lower() == "true"
+        return os.getenv("TEXT2VEC_SQL_ENABLED", "false").lower() == "true"
 
-    def get_text_to_vec_sql_config(self) -> dict:
-        """Get configuration dictionary for Text to Vector SQL client."""
-        return {}
+    @property
+    def url(self) -> str:
+        """Get the URL of the Text to Vector SQL server."""
+        return os.getenv("TEXT2VEC_SQL_URL")
+
+    @property
+    def api_key(self) -> str:
+        """Get the API key of the Text to Vector SQL server."""
+        return os.getenv("TEXT2VEC_SQL_API")
 
 # Global instance placeholders for the singleton pattern
 _MYSCALE_CONFIG_INSTANCE = None
 _CHDB_CONFIG_INSTANCE = None
 _PGVECTOR_CONFIG_INSTANCE = None
 _MCP_CONFIG_INSTANCE = None
-_TEXT_TO_VEC_SQL_CONFIG_INSTANCE = None
+_TEXT2VEC_SQL_CONFIG_INSTANCE = None
 
 
 def get_myscale_config() -> MyScaleConfig:
@@ -444,7 +450,7 @@ def get_mcp_config() -> MCPServerConfig:
 
 def get_text_to_vec_sql_config() -> TextToVecSQLConfig:
     """Gets the singleton instance of TextToVecSQLConfig."""
-    global _TEXT_TO_VEC_SQL_CONFIG_INSTANCE
-    if _TEXT_TO_VEC_SQL_CONFIG_INSTANCE is None:
-        _TEXT_TO_VEC_SQL_CONFIG_INSTANCE = TextToVecSQLConfig()
-    return _TEXT_TO_VEC_SQL_CONFIG_INSTANCE
+    global _TEXT2VEC_SQL_CONFIG_INSTANCE
+    if _TEXT2VEC_SQL_CONFIG_INSTANCE is None:
+        _TEXT2VEC_SQL_CONFIG_INSTANCE = TextToVecSQLConfig()
+    return _TEXT2VEC_SQL_CONFIG_INSTANCE

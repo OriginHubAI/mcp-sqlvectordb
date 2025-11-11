@@ -13,7 +13,6 @@ from fastmcp.tools import Tool
 from fastmcp.exceptions import ToolError
 from .prompts import MYSCALEDB_PROMPT
 from fastmcp.prompts import Prompt
-from ..common_utils import get_text_to_vec_sql_instance
 
 from ..config import get_myscale_config, get_mcp_config
 
@@ -120,8 +119,9 @@ def list_databases():
     """List available MyScaleDB databases"""
     logger.info("Listing all databases")
     client = create_myscale_client()
+    database = get_myscale_config().database
     result = client.command(
-        "SELECT name FROM system.databases WHERE name != 'system' and name != 'INFORMATION_SCHEMA' and name != 'information_schema'"
+        f"SELECT name FROM system.databases WHERE name = '{database}'"
     )
 
     # Convert newline-separated string to list and trim whitespace

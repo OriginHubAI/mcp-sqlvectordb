@@ -16,7 +16,7 @@ from .config import (
 from . import myscaledb
 from . import chdb
 from . import pgvector
-from . import common_utils
+from . import text2vecsql
 
 # Handle truststore
 if os.getenv("MCP_TRUSTSTORE_DISABLE", None) != "1":
@@ -32,7 +32,7 @@ __all__ = [
     "myscaledb",
     "chdb",
     "pgvector",
-    "common_utils",
+    "text2vecsql",
     "get_myscale_config",
     "get_chdb_config",
     "get_pgvector_config",
