@@ -88,7 +88,7 @@ class MyScaleConfig:
     @property
     def database(self) -> Optional[str]:
         """Get the default database name if set."""
-        return os.getenv("MYSCALE_DATABASE")
+        return os.getenv("MYSCALE_DATABASE", "default")
 
     @property
     def secure(self) -> bool:

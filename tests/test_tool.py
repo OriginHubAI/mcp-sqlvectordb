@@ -21,7 +21,7 @@ class TestClickhouseTools(unittest.TestCase):
         cls.client = create_myscale_client()
 
         # Prepare test database and table
-        cls.test_db = os.getenv("MYSCALE_DATABASE")
+        cls.test_db = os.getenv("MYSCALE_DATABASE", "default")
         cls.test_table = "test_table"
         cls.client.command(f"CREATE DATABASE IF NOT EXISTS {cls.test_db}")
 

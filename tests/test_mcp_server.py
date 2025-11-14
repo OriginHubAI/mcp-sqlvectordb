@@ -30,7 +30,7 @@ async def setup_test_database():
     client = create_myscale_client()
 
     # Test database and table names
-    test_db = os.getenv("MYSCALE_DATABASE")
+    test_db = os.getenv("MYSCALE_DATABASE", "default")
     test_table = "test_table"
     test_table2 = "another_test_table"
 
