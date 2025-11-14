@@ -61,8 +61,10 @@ Generated SQL:
 [EMBEDDING MODEL NAME]:
 {embedding_model}
 ## NATURAL LANGUAGE QUESTION
-In vector searches, the `MATCH` operator performs an approximate nearest neighbor (ANN) search, which identifies items based on their similarity to a given vector. The `lembed()` function is used to convert text phrases into vector representations using a specific model, in this case, `{embedding_model}`. This helps in finding items that align closely with the concept of "Popular menu items based on sales." The parameter `k = 5` specifies that only the top 5 categories, which are most similar in terms of the embedding, should be considered. The similarity is determined by calculating the Euclidean distance between vectors, where a smaller distance indicates higher similarity.
-{NaturalLanguageQuestion}
+In vector searches, the `MATCH` operator performs an approximate nearest neighbor (ANN) search, which identifies items based on their similarity to a given vector.
+The `lembed()` function is used to convert text phrases into vector representations using a specific model, in this case, `{embedding_model}`.
+This helps in finding items that align closely with the concept of "{NaturalLanguageQuestion}" The parameter `k = 5` specifies that only the top 5 categories,
+which are most similar in terms of the embedding, should be considered. The similarity is determined by calculating the Euclidean distance between vectors, where a smaller distance indicates higher similarity.
 Let's think step by step!
 """
 

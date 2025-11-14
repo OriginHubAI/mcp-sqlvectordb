@@ -68,17 +68,23 @@ def do_request(url: str, api_key: str, request: TextToVecSQLRequest) -> TextToVe
 def get_vector_query(natural_language_question: str, table_schema: str) -> str:
     """Get a vector query from a natural language question and table schema.
     
-    Use this tool for natural language questions that require a vector query.
+    IMPORTANT: Before calling this tool, you MUST translate the natural_language_question to English if it is not already in English.
+    This tool requires English input for optimal performance.
+    
+    Use this tool for natural language questions that require a vector query. 
+    You can use this tool to generate a vector query for a natural language question,
+    and then execute the query on the database. And return the results to the user.
 
     Suitable for:
     - Questions that require a vector query
     - Questions that require a standard SQL query
 
     Best practices:
+    - ALWAYS translate the question to English before calling this tool
     - Use the vector query tool for natural language questions that require a vector query
     - Use the standard SQL query tool for natural language questions that require a standard SQL query
 
-    Use this tool when you need to generate a vector query for a natural language question.
+    Use this tool when you need to generate a vector query for a natural language question. And then execute the query on the database.
     Example:
     - Can you unveil the crown jewel of our vegetarian delights, the one that has soared to the top of the sales charts from the elite circle of our most cherished categories this year?
     """

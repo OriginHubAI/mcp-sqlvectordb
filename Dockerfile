@@ -1,3 +1,4 @@
+# origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/mcp-sqlvectordb:0.0.6
 # Build stage - Use a Python image with uv pre-installed
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
