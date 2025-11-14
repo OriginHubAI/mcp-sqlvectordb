@@ -83,7 +83,8 @@ async def setup_test_database():
     yield test_db, test_table, test_table2
 
     # Cleanup after tests
-    # client.command(f"DROP DATABASE IF EXISTS {test_db}")
+    client.command(f"DROP TABLE IF EXISTS {test_db}.{test_table}")
+    client.command(f"DROP TABLE IF EXISTS {test_db}.{test_table2}")
 
 
 @pytest.fixture
