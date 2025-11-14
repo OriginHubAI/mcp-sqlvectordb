@@ -39,6 +39,8 @@ spec:
       trace_log/database: system
       trace_log/table: trace_log
       trace_log/flush_interval_milliseconds: 7500
+      user_defined_executable_functions_config: /var/lib/clickhouse/udf_configs/functions.xml
+      user_scripts_path: /var/lib/clickhouse/user_scripts
     users:
       default/networks/ip:
         - "127.0.0.1"
@@ -73,13 +75,50 @@ spec:
             <query_views_log remove="1" />
             <query_thread_log remove="1" />
         </clickhouse>
+      functions.xml: |-
+        <functions>
+          <function>
+              <name>EmbedText</name>
+              <type>executable_pool</type>
+              <pool_size>32</pool_size>
+              <send_chunk_header>true</send_chunk_header>
+              <format>JSONEachRow</format>
+              <return_type>Array(Float32)</return_type>
+              <return_name>embedding</return_name>
+              <argument>
+                  <name>text</name>
+                  <type>String</type>
+              </argument>
+              <argument>
+                  <name>provider</name>
+                  <type>String</type>
+              </argument>
+              <argument>
+                  <name>base_url</name>
+                  <type>String</type>
+              </argument>
+              <argument>
+                  <name>api_key</name>
+                  <type>String</type>
+              </argument>
+              <argument>
+                  <name>others</name>
+                  <type>JSON</type>
+              </argument>
+              <command>embedding</command>
+              <stderr_reaction>throw</stderr_reaction>
+              <command_read_timeout>10000000</command_read_timeout>
+              <command_write_timeout>10000000</command_write_timeout>
+              <max_command_execution_time>10000000</max_command_execution_time>
+          </function>
+        </functions>
 
   templates:
     serviceTemplates:
       - name: service-template
         metadata:
           annotations:
-            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: "internet"
+            service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: "intranet"
             service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-switch: "off"
             service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-flag: "off"
             service.beta.kubernetes.io/alibaba-cloud-loadbalancer-health-check-type: "http"
@@ -148,6 +187,9 @@ spec:
                 - containerPort: 9363
                   name: metrics
                   protocol: TCP
+              envFrom:
+                - configMapRef:
+                    name: http-proxy-config
               resources:
                 requests:
                   cpu: 2
@@ -155,6 +197,13 @@ spec:
                 limits:
                   cpu: 4
                   memory: 8Gi
+        initContainers:
+          - image: origin-hub-ai-registry.cn-shanghai.cr.aliyuncs.com/component/udfs:1.0.1
+            name: init-myscale
+            resources: {}
+            volumeMounts:
+              - mountPath: /var/lib/clickhouse
+                name: data-volume-claim-template
     volumeClaimTemplates:
       - name: data-volume-claim-template
         spec:
