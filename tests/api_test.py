@@ -1,6 +1,4 @@
-      
 import requests
-import json
 import os
 import dotenv
 
@@ -196,8 +194,7 @@ if __name__ == "__main__":
     # example = "Hi"
 
     response = requests.post(
-        URL,
-        json={"text_input": example}, headers={"Authorization": f"Bearer {API_KEY}"}
+        URL, json={"text_input": example}, headers={"Authorization": f"Bearer {API_KEY}"}
     )
 
     if response.status_code == 200:
@@ -211,7 +208,7 @@ if __name__ == "__main__":
 # Get Response Successfully
 # To address the question, we need to identify the top vegetarian menu item that has performed the best in terms of sales from the most popular categories. Here's a step-by-step breakdown of how to construct the SQL query:
 
-# 1. **Identify the Most Popular Categories**: 
+# 1. **Identify the Most Popular Categories**:
 #    - We need to find the top 5 categories based on their similarity to the concept "Popular menu items based on sales."
 #    - This involves using the `lembed` function to generate a reference vector for the concept and then calculating the distance between this vector and the `description_embedding` of each category.
 #    - We will use a `WITH` clause to define the reference vector and then select the top 5 categories based on the smallest distance.

@@ -1,4 +1,5 @@
 import unittest
+import os
 
 from dotenv import load_dotenv
 from fastmcp.exceptions import ToolError
@@ -20,7 +21,7 @@ class TestClickhouseTools(unittest.TestCase):
         cls.client = create_myscale_client()
 
         # Prepare test database and table
-        cls.test_db = "test_tool_db"
+        cls.test_db = os.getenv("MYSCALE_DATABASE")
         cls.test_table = "test_table"
         cls.client.command(f"CREATE DATABASE IF NOT EXISTS {cls.test_db}")
 

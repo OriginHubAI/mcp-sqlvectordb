@@ -93,7 +93,7 @@ def register_services():
             from mcp_server.pgvector import register_tools as register_pgvector_tools
         register_pgvector_tools(mcp)
         logger.info("pgvector service registered")
-    
+
     if os.getenv("TEXT2VECSQL_ENABLED", "false").lower() == "true":
         try:
             from .text2vecsql import register_tools as register_text2vecsql_tools

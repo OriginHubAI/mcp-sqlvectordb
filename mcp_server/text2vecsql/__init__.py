@@ -11,4 +11,5 @@ from .prompts import (
 __all__ = [
     "get_vector_query",
     "register_tools",
+    "TEXT2VEC_SQL_PROMPT",
 ]

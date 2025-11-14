@@ -7,6 +7,7 @@ from mcp_server.main import mcp, register_services
 from mcp_server.myscaledb import create_myscale_client
 from dotenv import load_dotenv
 import json
+import os
 
 # Load environment variables
 load_dotenv()
@@ -29,7 +30,7 @@ async def setup_test_database():
     client = create_myscale_client()
 
     # Test database and table names
-    test_db = "test_mcp_db"
+    test_db = os.getenv("MYSCALE_DATABASE")
     test_table = "test_table"
     test_table2 = "another_test_table"
 

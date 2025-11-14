@@ -392,6 +392,7 @@ class TextToVecSQLConfig:
         """Get the API key of the Text to Vector SQL server."""
         return os.getenv("TEXT2VEC_SQL_API")
 
+
 # Global instance placeholders for the singleton pattern
 _MYSCALE_CONFIG_INSTANCE = None
 _CHDB_CONFIG_INSTANCE = None
