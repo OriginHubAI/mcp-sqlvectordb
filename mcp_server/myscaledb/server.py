@@ -119,9 +119,8 @@ def list_databases():
     """List available MyScaleDB databases"""
     logger.info("Listing all databases")
     client = create_myscale_client()
-    result = client.command(
-        "SELECT name FROM system.databases WHERE name != 'system' and name != 'INFORMATION_SCHEMA' and name != 'information_schema'"
-    )
+    database = get_myscale_config().database
+    result = client.command(f"SELECT name FROM system.databases WHERE name = '{database}'")
 
     # Convert newline-separated string to list and trim whitespace
     if isinstance(result, str):
