@@ -44,7 +44,8 @@ class TestClickhouseTools(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Clean up the environment after tests."""
-        cls.client.command(f"DROP DATABASE IF EXISTS {cls.test_db}")
+        # cls.client.command(f"DROP DATABASE IF EXISTS {cls.test_db}")
+        pass
 
     def test_list_databases(self):
         """Test listing databases."""
