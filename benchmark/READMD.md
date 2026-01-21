@@ -1,7 +1,6 @@
-# Dify Text2VectorSQL Benchmark
+# MCP SQLVectorDB Benchmark
 
-![Text2VectorSQL Evaluation Process](./figures/mcp_vector_sql.png)
-This benchmark is designed to evaluate the performance of Dify Text2SQL models on Text2VectorSQL tasks. It provides comprehensive metrics to assess the accuracy, recall, and overall quality of SQL generation from natural language questions.
+This benchmark is designed to evaluate the performance of MCP SQLVectorDB models on Text2VectorSQL tasks. It provides comprehensive metrics to assess the accuracy, recall, and overall quality of SQL generation from natural language questions.
 
 ## How to Run this Benchmark
 
@@ -10,28 +9,31 @@ This benchmark is designed to evaluate the performance of Dify Text2SQL models o
 Before running the benchmark, ensure you have:
 - Python 3.8+
 - Dify API access with a valid API key
+- LLM API access with a valid API key
 - MyScale database access
 - Required Python packages (install via `pip install -r requirements.txt`)
 
 ### Configuration
 
-The benchmark requires the following configuration, which can be modified in `benchmark.py`:
+The benchmark requires the following configuration, which can be modified in `.env` file:
 
-```python
-# Dify API Configuration
-API_KEY = "your-dify-api-key"
-DIFY_URL = "https://api.dify.ai/v1/chat-messages"
+```
+# Dify API配置
+API_KEY=your-api-key-here
+DIFY_URL=https://api.dify.ai/v1/chat-messages
 
-# MyScale Database Configuration
-MYSCALE_HOST = "your-myscale-host"
-MYSCALE_PORT = 8123
-MYSCALE_USER = "your-myscale-username"
-MYSCALE_PASSWORD = "your-myscale-password"
-MYSCALE_DATABASE = "your-database-name"
+# MyScale数据库配置
+MYSCALE_HOST=your-myscale-host
+MYSCALE_PORT=8123
+MYSCALE_USER=your-myscale-username
+MYSCALE_PASSWORD=your-myscale-password
+MYSCALE_DATABASE=your-database-name
 
-# Default Settings
-DEFAULT_DATASET_PATH = "./data/results/test/olympics/olympics_qs.json"
-DEFAULT_OUTPUT_PATH = "./results"
+# LLM API配置
+LLM_API_URL=your-llm-api-url
+LLM_API_KEY=your-llm-api-key
+LLM_MODEL=your-llm-model
+LLM_EVALUATION_ENABLED=True
 ```
 
 ### Running the Benchmark
@@ -39,7 +41,7 @@ DEFAULT_OUTPUT_PATH = "./results"
 You can run the benchmark using the following command:
 
 ```bash
-cd Benchmark
+cd benchmark
 python benchmark.py [options]
 ```
 
@@ -102,7 +104,7 @@ The benchmark uses a comprehensive set of metrics to evaluate Text2SQL performan
 
 ### Evaluation Process
 
-1. **SQL Extraction**: Extract SQL statements from Dify's natural language responses
+1. **SQL Extraction**: Extract SQL statements from MCP SQLVectorDB's natural language responses
 2. **SQL Execution**: Execute both standard and predicted SQL on the MyScale database
 3. **Result Comparison**: Compare execution results using set and ranking metrics
 4. **LLM Evaluation**: (Optional) Use GPT-4o to evaluate SQL semantic correctness
@@ -118,7 +120,7 @@ The benchmark uses a comprehensive set of metrics to evaluate Text2SQL performan
 
 ### Python Dependencies
 
-- `requests`: For API calls to Dify
+- `requests`: For API calls
 - `clickhouse_connect`: For connecting to MyScale database
 - `argparse`: For command-line argument parsing
 - `json`: For data handling
@@ -133,17 +135,19 @@ The benchmark uses a comprehensive set of metrics to evaluate Text2SQL performan
 
 ### API Requirements
 
-- **Dify API**: Access to Dify's chat completion API with Text2SQL capabilities
+- **API**: Access to MCP SQLVectorDB's API with Text2SQL capabilities
+- **LLM API**: Access to LLM model API with a valid API key
 - **OpenAI API**: (Optional) For LLM-based evaluation using GPT-4o
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **API Connection Errors**: Verify your Dify API key and network connectivity
-2. **Database Errors**: Check MyScale connection parameters and database permissions
-3. **SQL Execution Failures**: Ensure the database schema matches the expected structure
-4. **LLM Evaluation Failures**: Verify OpenAI API access if using LLM evaluation
+1. **API Connection Errors**: Verify your API key and network connectivity
+2. **LLM API Errors**: Verify your LLM API key and network connectivity
+3. **Database Errors**: Check MyScale connection parameters and database permissions
+4. **SQL Execution Failures**: Ensure the database schema matches the expected structure
+5. **LLM Evaluation Failures**: Verify OpenAI API access if using LLM evaluation
 
 ### Logging
 
