@@ -1,5 +1,4 @@
 import json
-import os
 import shutil
 
 def filter_synthea_samples(file_path):

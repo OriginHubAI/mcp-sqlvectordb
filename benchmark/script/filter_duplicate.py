@@ -1,5 +1,4 @@
 import json
-import os
 
 def filter_duplicate_samples(input_file_1, input_file_2, output_file):
     # 读取输入文件

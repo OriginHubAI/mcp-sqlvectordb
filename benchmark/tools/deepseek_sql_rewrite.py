@@ -55,7 +55,7 @@ import json
 import requests
 import argparse
 from clickhouse_connect import get_client
-from typing import List, Dict, Tuple, Optional
+from typing import List, Tuple
 
 def call_deepseek_api(original_sql: str) -> str:
     """

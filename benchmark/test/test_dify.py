@@ -41,7 +41,7 @@ def get_agent_answer(question):
                 try:
                     data = json.loads(line_str[6:])  # 去掉 "data: " 前缀
                     full_answer += data.get("answer", "")
-                except:
+                except Exception:
                     continue  # 忽略解析失败的行（不影响整体）
 
         return full_answer

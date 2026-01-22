@@ -5,8 +5,6 @@ Common utilities for the Text2VectorSQL Benchmark
 """
 
 import re
-from typing import List, Tuple
-from clickhouse_connect import get_client
 
 
 

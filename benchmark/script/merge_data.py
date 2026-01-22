@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 
 def verify_no_duplicates(file_path):
@@ -31,7 +30,7 @@ def verify_no_duplicates(file_path):
             print(f"  {i}. {dup[:100]}...")
         return False
     else:
-        print(f"\n验证通过: 文件中没有任何重复数据")
+        print("\n验证通过: 文件中没有任何重复数据")
         return True
 
 def merge_and_deduplicate(input_dir, output_file):
@@ -74,7 +73,7 @@ def merge_and_deduplicate(input_dir, output_file):
         else:
             print(f"  警告: {json_file.name} 不是数组格式，跳过")
     
-    print(f"\n总计:")
+    print("\n总计:")
     print(f"  合并后总条目数: {len(all_data)}")
     print(f"  去重后唯一Question数: {len(seen_questions)}")
     

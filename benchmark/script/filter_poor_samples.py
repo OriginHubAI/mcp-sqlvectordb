@@ -1,6 +1,5 @@
 import re
 import json
-import os
 
 def filter_poor_recall_samples():
     # 定义文件路径
@@ -47,7 +46,7 @@ def filter_poor_recall_samples():
                     intersection = eval(intersection_str.replace('"', '\''))
                 else:
                     intersection = eval(intersection_str)
-            except:
+            except Exception:
                 # 如果解析失败，使用空集合
                 test_values = set()
                 golden_values = set()

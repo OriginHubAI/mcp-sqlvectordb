@@ -2,9 +2,11 @@
 
 import re
 import numpy as np
-from typing import Tuple, List, Dict, Any, Optional
+from typing import Tuple, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
+import requests
+import json
 
 # 加载环境变量
 load_dotenv()
@@ -561,12 +563,6 @@ def calculate_ranking_metrics_with_columns(test_results: list[tuple], test_colum
 # ==============================================================================
 # LLM-based VectorSQL Query evaluation
 # ==============================================================================
-
-from pyparsing import col
-import requests
-import json
-import re
-from typing import Dict, Any, Optional
 
 def extract_and_parse_json(model_output_text: str) -> Dict[str, Any]:
     """

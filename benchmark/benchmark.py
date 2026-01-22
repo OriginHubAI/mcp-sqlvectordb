@@ -1,29 +1,19 @@
 import json
 import os
-import requests
 import argparse
-from clickhouse_connect import get_client
-from typing import List, Dict, Tuple, Optional, Any
-from dotenv import load_dotenv
-
-# 加载环境变量
-load_dotenv()
-
-# 导入公共工具函数
-from tools.common import unify_lembed_clauses, get_dify_answer
 from datetime import datetime
+from typing import List, Dict, Tuple, Optional, Any
+from clickhouse_connect import get_client
+from dotenv import load_dotenv
 
 from evaluation.metrics import (
     extract_sql_from_dify_answer,
-    calculate_exact_match_any_gt_with_columns,
-    calculate_set_metrics_with_columns,
-    calculate_ranking_metrics_with_columns,
-    evaluate_vectorsql_with_llm,
-    calculate_llm_based_scores,
     evaluate_with_metrics
 )
-from tools.deepseek_sql_rewrite import call_deepseek_api
-from tools.hybrid_search import rewrite_single_table_to_hybrid_search
+from tools.common import unify_lembed_clauses, get_dify_answer
+
+# 加载环境变量
+load_dotenv()
 
 
 class Text2SQLBenchmark:
@@ -169,7 +159,7 @@ class Text2SQLBenchmark:
             print(f"📝 样本 {i}/{total_samples}")
             print(f"问题: {question}")
 
-            print(f"\n🤖 步骤1: 调用Dify API获取回答...")
+            print("\n🤖 步骤1: 调用Dify API获取回答...")
             dify_answer = get_dify_answer(question, self.api_key, self.dify_url)
             if dify_answer.startswith("ERROR:"):
                 print(f"    ❌ Dify调用失败: {dify_answer}")
@@ -177,12 +167,12 @@ class Text2SQLBenchmark:
 
             print(f"    ✅ Dify回答获取成功: {dify_answer}")
 
-            print(f"    步骤2: 从Dify回答中提取SQL...")
+            print("    步骤2: 从Dify回答中提取SQL...")
             predicted_sql = extract_sql_from_dify_answer(dify_answer)
             if not predicted_sql:
-                print(f"    ❌ 无法从Dify回答中提取SQL")
+                print("    ❌ 无法从Dify回答中提取SQL")
                 continue
-            print(f"    ✅ 提取到预测SQL")
+            print("    ✅ 提取到预测SQL")
             print(f"    标准SQL: {standard_sql}")
             print(f"    预测SQL: {predicted_sql}")
 
@@ -194,10 +184,10 @@ class Text2SQLBenchmark:
             
             # 如果预测SQL发生了变化，输出信息
             if predicted_sql != original_predicted_sql:
-                print(f"    🔄 统一了lembed子句")
+                print("    🔄 统一了lembed子句")
                 print(f"    统一后预测SQL: {predicted_sql}")
 
-            print(f"    步骤3: 使用metrics.py进行评估...")
+            print("    步骤3: 使用metrics.py进行评估...")
             eval_results = evaluate_with_metrics(
                 run_sql_func=self.run_sql_with_columns,
                 nl_question=question,
@@ -211,9 +201,9 @@ class Text2SQLBenchmark:
                 error_type = eval_results.get('error_type', '')
                 if error_type == 'EMPTY_GOLDEN_DATA' or error_type == 'EMPTY_TEST_DATA':
                     if error_type == 'EMPTY_GOLDEN_DATA':
-                        print(f"    ⏭️  标准SQL无结果，跳过此样本")
+                        print("    ⏭️  标准SQL无结果，跳过此样本")
                     else:
-                        print(f"    ⏭️  预测SQL执行失败或无结果，跳过此样本")
+                        print("    ⏭️  预测SQL执行失败或无结果，跳过此样本")
                     skipped_count += 1
                     continue
                 print(f"    ❌ 评估失败: {eval_results['error']}")
@@ -232,8 +222,8 @@ class Text2SQLBenchmark:
             results.append(result_item)
             all_eval_results.append(eval_results)
 
-            print(f"    ✅ 评估结果:")
-            print(f"       标准SQL执行结果:")
+            print("    ✅ 评估结果:")
+            print("       标准SQL执行结果:")
             golden_data = eval_results.get('golden_data', [])
             golden_columns = eval_results.get('golden_columns', [])
             if golden_data:
@@ -243,7 +233,7 @@ class Text2SQLBenchmark:
                 if len(golden_data) > 5:
                     print(f"       ... 共 {len(golden_data)} 行")
             else:
-                print(f"       (空结果)")
+                print("       (空结果)")
             print(f"       Exact Match: {eval_results.get('exact_match', 'N/A'):.3f}")
             print(f"       Precision:   {eval_results.get('precision', 'N/A'):.3f}")
             print(f"       Recall:      {eval_results.get('recall', 'N/A'):.3f}")
@@ -285,7 +275,7 @@ class Text2SQLBenchmark:
         print(f"\n总样本数: {total_samples}")
         print(f"成功评估样本数: {success_count}")
         print(f"跳过样本数(标准SQL无结果): {skipped_count}")
-        print(f"\n🎯 平均评估指标:")
+        print("\n🎯 平均评估指标:")
         print(f"   Exact Match: {avg_exact_match:.4f} ({avg_exact_match*100:.2f}%)")
         print(f"   Precision:   {avg_precision:.4f}")
         print(f"   Recall:      {avg_recall:.4f}")

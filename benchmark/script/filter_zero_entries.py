@@ -76,7 +76,7 @@ def filter_zero_recall_samples(benchmark_file_path, data_file_path, output_file_
         with open(output_file_path, 'w', encoding='utf-8') as f:
             json.dump(filtered_samples, f, ensure_ascii=False, indent=4)
         
-        print(f"过滤完成!")
+        print("过滤完成!")
         print(f"成功提取的样本数: {len(filtered_samples)}")
         print(f"结果已保存到: {output_file_path}")
         

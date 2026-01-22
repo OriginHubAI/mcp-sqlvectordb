@@ -128,7 +128,7 @@ def filter_samples_by_recall(input_file, output_file, recall_threshold=0.6, oper
                     # 打印evaluation字段的详细信息，包括golden_data和golden_columns
                     evaluation = sample.get('evaluation', {})
                     if evaluation:
-                        rf.write(f"评估结果:\n")
+                        rf.write("评估结果:\n")
                         rf.write(f"  Recall: {evaluation.get('recall', 'N/A')}\n")
                         rf.write(f"  Precision: {evaluation.get('precision', 'N/A')}\n")
                         rf.write(f"  F1: {evaluation.get('f1', 'N/A')}\n")
@@ -143,7 +143,7 @@ def filter_samples_by_recall(input_file, output_file, recall_threshold=0.6, oper
             
             print(f"\n可读版本已保存到: {readable_output_file}")
         
-        print(f"过滤完成！")
+        print("过滤完成！")
         print(f"原始样本数量: {len(samples)}")
         print(f"过滤后样本数量: {len(filtered_samples)}")
         print(f"结果已保存到: {output_file}")

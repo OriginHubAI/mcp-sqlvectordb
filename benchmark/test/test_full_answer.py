@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     # 检查是否包含标准答案
     standard_answers = ['Test Article 0', 'Test Article 1', 'Test Article 2']
-    print(f"\n\n检查标准答案:")
+    print("\n\n检查标准答案:")
     for ans in standard_answers:
         if ans in answer:
             print(f"  ✅ 找到: {ans}")

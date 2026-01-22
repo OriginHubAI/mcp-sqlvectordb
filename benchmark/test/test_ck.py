@@ -1,5 +1,6 @@
-from clickhouse_connect import get_client
+import os
 import pandas as pd
+from clickhouse_connect import get_client
 
 def get_myscale_client():
     """创建并返回 MyScaleDB 客户端"""
