@@ -27,8 +27,10 @@ class TextToVecSQLResponse:
     @classmethod
     def handle_response(cls, response: requests.Response) -> "TextToVecSQLResponse":
         """Handle a response from the Text to Vector SQL server."""
-        assert response.status_code == 200, f"Error: {response.json()['error_message'] if 'error_message' in response.json() else str(response.json())}"
-        
+        assert response.status_code == 200, (
+            f"Error: {response.json()['error_message'] if 'error_message' in response.json() else str(response.json())}"
+        )
+
         # 处理新的聊天完成 API 响应格式
         response_data = response.json()
         if "choices" in response_data and response_data["choices"]:
@@ -37,7 +39,7 @@ class TextToVecSQLResponse:
         else:
             # 兼容旧格式
             results = response_data["result"]
-            
+
         handle_step = ""
         sql = ""
         next_is_sql = False
@@ -81,31 +83,32 @@ def do_request(url: str, api_key: str, request: TextToVecSQLRequest) -> TextToVe
         # 使用新的聊天完成 API 格式
         response = requests.post(
             "https://cloud.infini-ai.com/AIStudio/inference/api/if-dce5zpkpwhejio5f/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             json={
                 "model": "/mnt/DataFlow/ydw/model/UniVectorSQL-7B-LoRA-Step800",
                 "messages": [
                     {
                         "role": "system",
-                        "content": request.prompt  # 完整的系统提示词（包含所有 schema 和规则）
+                        "content": request.prompt,  # 完整的系统提示词（包含所有 schema 和规则）
                     },
                     {
                         "role": "user",
-                        "content": request.natural_language_question  # 用户的自然语言问题
-                    }
+                        "content": request.natural_language_question,  # 用户的自然语言问题
+                    },
                 ],
                 "max_tokens": 2048,
                 "temperature": 0.05,  # SQL 生成任务用较低的温度保证准确性
-                "top_p": 0.95
-            }
+                "top_p": 0.95,
+            },
         )
         return TextToVecSQLResponse.handle_response(response)
     except Exception as e:
         # print("[log] error: ", str(e))
-        return TextToVecSQLResponse(results= {}, error_message=str(e), error_code=response.status_code if 'response' in locals() else 500)
+        return TextToVecSQLResponse(
+            results={},
+            error_message=str(e),
+            error_code=response.status_code if "response" in locals() else 500,
+        )
 
 
 def get_vector_query(natural_language_question: str, table_schema: str) -> str:

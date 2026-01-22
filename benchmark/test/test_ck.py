@@ -2,15 +2,17 @@ import os
 import pandas as pd
 from clickhouse_connect import get_client
 
+
 def get_myscale_client():
     """创建并返回 MyScaleDB 客户端"""
     return get_client(
-        host=os.getenv("MYSCALE_HOST"),    # 你的MyScale IP
-        port=int(os.getenv("MYSCALE_PORT")),               # HTTP客户端专用端口
-        user=os.getenv("MYSCALE_USER"),          # 用户名
+        host=os.getenv("MYSCALE_HOST"),  # 你的MyScale IP
+        port=int(os.getenv("MYSCALE_PORT")),  # HTTP客户端专用端口
+        user=os.getenv("MYSCALE_USER"),  # 用户名
         password=os.getenv("MYSCALE_PASSWORD"),  # 密码
-        database=os.getenv("MYSCALE_DATABASE")       # 默认数据库
+        database=os.getenv("MYSCALE_DATABASE"),  # 默认数据库
     )
+
 
 def run_myscale_sql(sql: str, return_df: bool = True):
     """
@@ -24,10 +26,10 @@ def run_myscale_sql(sql: str, return_df: bool = True):
         # 创建客户端
         client = get_myscale_client()
         print(f"🔍 执行SQL: {sql}")
-        
+
         # 执行SQL
         result = client.query(sql)
-        
+
         # 处理结果（终极兼容：适配所有clickhouse-connect版本）
         if return_df:
             # 无结果集（DDL语句）
@@ -52,6 +54,7 @@ def run_myscale_sql(sql: str, return_df: bool = True):
         # 确保客户端连接关闭
         if client:
             client.close()
+
 
 # ========== 极简测试示例 ==========
 if __name__ == "__main__":

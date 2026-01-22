@@ -57,19 +57,20 @@ import argparse
 from clickhouse_connect import get_client
 from typing import List, Tuple
 
+
 def call_deepseek_api(original_sql: str) -> str:
     """
     调用DeepSeek API改写SQL
-    
+
     Args:
         original_sql: 原始SQL语句
         prompt: 提示词
         api_key: DeepSeek API密钥
-        
+
     Returns:
         改写后的SQL语句
     """
-    prompt="""因为向量查询精度不高，我需要给我的sql按照我的语法，加上rerank方法。
+    prompt = """因为向量查询精度不高，我需要给我的sql按照我的语法，加上rerank方法。
     1. 例如例如将vector sql：WITH
     lembed('intfloat/E5-Mistral-7B-Instruct', 'bustling, vibrant, cultural, and have historical sites') AS ref_vec
 
@@ -147,36 +148,35 @@ ORDER BY relevance_score DESC;
 """
     url = os.getenv("LLM_API_URL", "https://api.deepseek.com/chat/completions")
     api_key = os.getenv("LLM_API_KEY")
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
-    
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+
     messages = [
         {
             "role": "user",
-            "content": f"{prompt}\n\n原始SQL: {original_sql}\n\n请只返回改写后的可执行的SQL语句，不要包含其他多余的字符。"
+            "content": f"{prompt}\n\n原始SQL: {original_sql}\n\n请只返回改写后的可执行的SQL语句，不要包含其他多余的字符。",
         }
     ]
-    
+
     data = {
         "model": "deepseek-chat",
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 1000,
-        "stream": False
+        "stream": False,
     }
-    
+
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
-        
+
         result = response.json()
         if "choices" in result and len(result["choices"]) > 0:
-            return result["choices"][0]["message"]["content"].strip()[7:-5]  # 需要去掉开头的‘’‘sql 和末尾的‘’‘和分号和一个空格
+            return result["choices"][0]["message"]["content"].strip()[
+                7:-5
+            ]  # 需要去掉开头的‘’‘sql 和末尾的‘’‘和分号和一个空格
         else:
             raise ValueError("DeepSeek API返回格式错误")
-            
+
     except requests.RequestException as e:
         print(f"DeepSeek API调用失败: {str(e)}")
         return ""
@@ -184,10 +184,13 @@ ORDER BY relevance_score DESC;
         print(f"DeepSeek API处理失败: {str(e)}")
         return ""
 
-def run_sql_with_columns(sql: str, host: str, port: int, user: str, password: str, database: str) -> Tuple[List[tuple], List[str]]:
+
+def run_sql_with_columns(
+    sql: str, host: str, port: int, user: str, password: str, database: str
+) -> Tuple[List[tuple], List[str]]:
     """
     执行SQL查询并返回结果和列名
-    
+
     Args:
         sql: SQL查询语句
         host: 数据库主机
@@ -195,47 +198,46 @@ def run_sql_with_columns(sql: str, host: str, port: int, user: str, password: st
         user: 数据库用户名
         password: 数据库密码
         database: 数据库名称
-        
+
     Returns:
         (查询结果数据, 查询结果列名)
     """
     client = None
     try:
-        client = get_client(
-            host=host,
-            port=port,
-            user=user,
-            password=password,
-            database=database
-        )
-        
+        client = get_client(host=host, port=port, user=user, password=password, database=database)
+
         result = client.query(sql)
-        
+
         if not result.result_set:
             return [], []
-        
+
         column_names = result.column_names
-        
+
         # 过滤掉distance和embedding字段（可选）
-        distance_indices = [i for i, col in enumerate(column_names) if 'distance' in col.lower()]
-        embedding_indices = [i for i, col in enumerate(column_names) if 'embedding' in col.lower()]
+        distance_indices = [i for i, col in enumerate(column_names) if "distance" in col.lower()]
+        embedding_indices = [i for i, col in enumerate(column_names) if "embedding" in col.lower()]
         exclude_indices = set(distance_indices + embedding_indices)
-        
+
         data = []
         for row in result.result_set:
-            filtered_row = tuple(value for idx, value in enumerate(row) if idx not in exclude_indices)
+            filtered_row = tuple(
+                value for idx, value in enumerate(row) if idx not in exclude_indices
+            )
             data.append(filtered_row)
-        
-        filtered_columns = [col for idx, col in enumerate(column_names) if idx not in exclude_indices]
-        
+
+        filtered_columns = [
+            col for idx, col in enumerate(column_names) if idx not in exclude_indices
+        ]
+
         return data, filtered_columns
-        
+
     except Exception as e:
         print(f"SQL执行失败: {str(e)}")
         return [], []
     finally:
         if client:
             client.close()
+
 
 def main():
     """
@@ -248,49 +250,51 @@ def main():
     DEFAULT_MYSCALE_USER = os.getenv("MYSCALE_USER")
     DEFAULT_MYSCALE_PASSWORD = os.getenv("MYSCALE_PASSWORD")
     DEFAULT_MYSCALE_DATABASE = os.getenv("MYSCALE_DATABASE")
-    DEFAULT_SQL_PATH="./data/results/test/olympics/olympics_qs.json"
+    DEFAULT_SQL_PATH = "./data/results/test/olympics/olympics_qs.json"
     parser = argparse.ArgumentParser(description="使用DeepSeek API批量改写SQL并执行")
-    parser.add_argument("--sqls", help="包含多个SQL语句的文件名（使用;分隔）", default=DEFAULT_SQL_PATH)
+    parser.add_argument(
+        "--sqls", help="包含多个SQL语句的文件名（使用;分隔）", default=DEFAULT_SQL_PATH
+    )
     parser.add_argument("--api-key", help="DeepSeek API密钥", default=DEFAULT_DEEPSEEK_API_KEY)
     parser.add_argument("--host", help="数据库主机", default=DEFAULT_MYSCALE_HOST)
     parser.add_argument("--port", help="数据库端口", type=int, default=DEFAULT_MYSCALE_PORT)
     parser.add_argument("--user", help="数据库用户名", default=DEFAULT_MYSCALE_USER)
     parser.add_argument("--password", help="数据库密码", default=DEFAULT_MYSCALE_PASSWORD)
     parser.add_argument("--database", help="数据库名称", default=DEFAULT_MYSCALE_DATABASE)
-    
+
     args = parser.parse_args()
-    
+
     sql_statements = []
-    
+
     # 处理文件输入
     if args.sqls:
         try:
-            with open(args.sqls, 'r', encoding='utf-8') as f:
+            with open(args.sqls, "r", encoding="utf-8") as f:
                 file_content = f.read().strip()
-                
+
                 # 检测是否为JSON格式
-                if file_content.startswith('{') or file_content.startswith('['):
+                if file_content.startswith("{") or file_content.startswith("["):
                     # JSON格式解析
                     json_data = json.loads(file_content)
                     sql_statements = []
-                    
+
                     # 处理数组格式 [{}, {}, ...]
                     if isinstance(json_data, list):
                         for item in json_data:
-                            if isinstance(item, dict) and 'sql' in item:
-                                sql_statements.append(item['sql'].strip())
+                            if isinstance(item, dict) and "sql" in item:
+                                sql_statements.append(item["sql"].strip())
                     # 处理单个对象格式 {}
-                    elif isinstance(json_data, dict) and 'sql' in json_data:
-                        sql_statements.append(json_data['sql'].strip())
+                    elif isinstance(json_data, dict) and "sql" in json_data:
+                        sql_statements.append(json_data["sql"].strip())
                     else:
                         print("JSON格式不正确，无法提取SQL语句")
                         return
                 else:
                     # 普通分号分隔格式解析
-                    sql_statements = file_content.split(';')
+                    sql_statements = file_content.split(";")
                     # 过滤掉空语句
                     sql_statements = [sql.strip() for sql in sql_statements if sql.strip()]
-                    
+
         except json.JSONDecodeError as e:
             print(f"JSON解析失败: {str(e)}")
             return
@@ -303,33 +307,35 @@ def main():
         sql_lines = []
         while True:
             line = input().strip()
-            if line.upper() == 'GO':
+            if line.upper() == "GO":
                 break
             sql_lines.append(line)
-        sql_text = ' '.join(sql_lines).strip()
+        sql_text = " ".join(sql_lines).strip()
         if sql_text:
             sql_statements = [sql_text]
-    
+
     if not sql_statements:
         print("没有有效的SQL语句可以处理")
         return
-    
+
     if not args.api_key:
         print("请提供DeepSeek API密钥，可以使用 --api-key 参数或者设置DEEPSEEK_API_KEY环境变量")
         return
-    
+
     print("=== 开始批量处理 ===")
     print(f"总共要处理 {len(sql_statements)} 个SQL语句\n")
-    
+
     # 循环处理每个SQL语句
     for idx, sql in enumerate(sql_statements[40:50], 1):
-        print(f"\n==================== 处理第 {idx}/{len(sql_statements)} 个SQL ====================")
+        print(
+            f"\n==================== 处理第 {idx}/{len(sql_statements)} 个SQL ===================="
+        )
         print(f"原始SQL: {sql}")
-        
+
         # 调用DeepSeek API改写SQL
         print("\n正在调用DeepSeek API改写SQL...")
         rewritten_sql = call_deepseek_api(sql)
-        
+
         if not rewritten_sql:
             print("改写失败，跳过此SQL")
             continue
@@ -339,14 +345,9 @@ def main():
         # 执行改写后的SQL
         print("\n正在执行改写后的SQL...")
         data, columns = run_sql_with_columns(
-            rewritten_sql,
-            args.host,
-            args.port,
-            args.user,
-            args.password,
-            args.database
+            rewritten_sql, args.host, args.port, args.user, args.password, args.database
         )
-        
+
         if data and columns:
             print("\n=== 执行结果 ===")
             print(f"返回列名: {columns}")
@@ -354,13 +355,14 @@ def main():
             print("\n结果示例:")
             # 打印前5行
             for i, row in enumerate(data[:5]):
-                print(f"  行{i+1}: {row}")
+                print(f"  行{i + 1}: {row}")
             if len(data) > 5:
                 print(f"  ... 还有{len(data) - 5}行")
         else:
             print("\n执行结果为空或执行失败")
-    
+
     print("\n=== 批量处理完成 ===")
+
 
 if __name__ == "__main__":
     main()
