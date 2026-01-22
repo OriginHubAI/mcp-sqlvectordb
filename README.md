@@ -1,8 +1,8 @@
-# mcp-vectorsql
+# MCP-VectorSQL
 
 ## Overview
 
-mcp-vectorsql is a powerful vector SQL generation tool that converts natural language questions into high-quality SQL queries, specifically designed for vector databases. It enables users to interact with vector databases using natural language, simplifying complex vector search operations.
+MCP-VectorSQL is a powerful vector SQL generation tool that converts natural language questions into high-quality SQL queries, specifically designed for vector databases. It enables users to interact with vector databases using natural language, simplifying complex vector search operations.
 
 ## Architecture
 
