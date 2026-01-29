@@ -1,0 +1,603 @@
+[
+  {
+    "question": "Could you show me the 5 cities that are most representative of a capital city with a rich history and vibrant culture?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'a rich history and vibrant culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you show me the IDs and names of the 3 games most related to the Olympic games held in summer?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic games held in summer') AS ref_vec_0\n\nSELECT id, games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Identify the top 5 cities characterized as bustling with rich history and vibrant culture, and provide their IDs, names, descriptions, and similarity distances.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'bustling with rich history and vibrant culture') AS ref_vec_0\n\nSELECT city_name, city_description, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you locate that city known for being a lively metropolitan hub with a deep historical backdrop and contemporary attractions?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'a lively metropolitan hub with a deep historical backdrop and contemporary attractions') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "**User**: \"I'm interested in learning about different cities.\"\n**Assistant**: \"Could you describe the type of city you're looking for?\"\n**User**: \"I'm looking for a city that's vibrant and known for its rich culture and history.\"\n**Assistant**: \"Got it. How many cities would you like information on?\"\n**User**: \"Just one city for now.\"\n**Assistant**: \"Alright, I will identify one city that fits your description the best.\"\n**User**: \"Perfect, what details will you provide about this city?\"\n**Assistant**: \"I will provide the ID and name of the city for you.\"\n**User**: \"Sounds good, thank you!\"\n**Assistant**: \"You're welcome. I'll proceed with retrieving that information for you.\"",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'vibrant and known for its rich culture and history') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey! Could you snag the names and distances of the top 5 cities that are like a bustling metropolis with lots of cultural landmarks? Thanks!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'a bustling metropolis with lots of cultural landmarks') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Hey, can you find the top 5 cities that are all about vibrant culture and lively markets? I need their IDs and how closely they match the vibe.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'vibrant culture and lively markets') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "**  \nIdentify and return the ID, name, description, embedding, and similarity distance of the top 5 cities that are renowned for their rich cultural heritage and vibrant nightlife.  \n**",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'are renowned for their rich cultural heritage and vibrant nightlife') AS ref_vec_0\n\nSELECT city_name, city_description, city_description_embedding, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Identify the IDs of the three cities that align most closely with the description of being bustling urban areas known for their cultural heritage and vibrant nightlife.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'being bustling urban areas known for their cultural heritage and vibrant nightlife') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Can you tell me the name of a bustling city that's famous for its lively culture and historical sites?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'a bustling city that's famous for its lively culture and historical sites?') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Could you show me the top 5 cities that hosted games most associated with winter conditions in a snowy region, and list their names and IDs?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'most associated with winter conditions in a snowy region') AS ref_vec_0,\n\nRankedGames AS (\n    SELECT \n        g.id AS games_id, \n        g.games_name AS games_name, \n        g.games_year AS games_year, \n        g.season AS season, \n        distance(g.games_description_embedding, ref_vec_0) AS games_distance\n      FROM games AS g\n    ORDER BY games_distance\n    LIMIT 5\n),\n\nCityGames AS (\n    SELECT \n        c.id AS city_id, \n        c.city_name AS city_name, \n        cg.games_id AS games_id\n      FROM city AS c\n      JOIN games_city AS cg ON toString(c.id) = toString(cg.city_id)\n      WHERE cg.games_id IN (SELECT games_id FROM RankedGames)\n)\n\nSELECT \n  c.city_id AS city_id, \n  c.city_name AS city_name\nFROM CityGames AS c\nJOIN RankedGames AS rg ON toString(c.games_id) = toString(rg.games_id)\nORDER BY rg.games_distance\nLIMIT 5;"
+  },
+  {
+    "question": "What are the top 3 cities known for their cultural richness and vibrant arts, based on their description similarity? Please list their IDs, names, and similarity distances.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'known for their cultural richness and vibrant arts') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Hey there! Can you find me the names and IDs of the top 5 medals that best represent the idea of winning an Olympic gold medal?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'best represent the idea of winning an Olympic gold medal') AS ref_vec_0\n\nSELECT id, medal_name, distance(medal.medal_description_embedding, ref_vec_0) AS distance \nFROM medal\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you show me a few cities that seem to be vibrant hubs filled with diverse cultures and have a rich history?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'vibrant hubs filled with diverse cultures and have a rich history') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Identify the five cities that best match the description of a bustling metropolitan area known for its culture and history, and provide their identifiers, names, descriptions, description embeddings, and similarity scores.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'bustling metropolitan city known for its culture and history') AS ref_vec_0\n\nSELECT city_name, city_description, city_description_embedding, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you please find the IDs and names of the two cities that best match the description of being vibrant and famous for cultural landmarks and rich history? I really need the top contenders!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'being vibrant and famous for cultural landmarks and rich history') AS ref_vec_0\n\nSELECT city.id, city.city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 2;"
+  },
+  {
+    "question": "List the top 3 cities where the top 5 games related to the thrilling 2000 Summer Games with spectacular performances took place.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'thrilling 2000 Summer Games with spectacular performances') AS ref_vec_0,\n\nRecentGames AS (\n    SELECT g.id, g.games_name, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM city c\nJOIN games_city gc ON toString(c.id) = toString(gc.city_id)\nJOIN RecentGames rg ON toString(gc.games_id) = toString(rg.id)\nORDER BY rg.distance\nLIMIT 3;"
+  },
+  {
+    "question": "Hey! Can you tell me the name of the top city that's renowned for its historical vibe and stunning architecture?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'renowned for its historical vibe and stunning architecture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "What is the name of the city that stands as a lone beacon, resonating with the enigmatic tales of London?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'stands as a lone beacon, resonating with the enigmatic tales of London') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\nFROM city AS c\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey, can you find me the top 5 regions within the National Olympic Committee that have a strong sporting heritage? I need their IDs and how closely they match that description!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'strong sporting heritage') AS ref_vec_0\n\nSELECT id, distance(noc_region.noc_region_description_embedding, ref_vec_0) AS distance\nFROM noc_region\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you provide the IDs and names of the top 5 cities that are recognized for their ancient architecture and historical significance?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'recognized for its ancient architecture and historical significance') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you list the games played in the top 5 cities that are known for their vibrant culture and historic landmarks, ordered by their similarity to these characteristics?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'are known for their vibrant culture and historic landmarks') AS ref_vec_0,\n\nSimilarCities AS (\n    SELECT c.id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city AS c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name\nFROM games AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN SimilarCities AS sc ON toString(gc.city_id) = toString(sc.id)\nORDER BY sc.distance;"
+  },
+  {
+    "question": "Can you identify the top 5 cities that are bustling metropolitan areas known for their vibrant arts scenes and historic architecture, and give me their IDs?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'are bustling metropolitan areas known for their vibrant arts scenes and historic architecture') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "What are the names of the top 5 games related to the Olympic games held in a major city, and in which cities were they held?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic games held in a major city') AS ref_vec_0,\n\nRelevantGames AS (\n    SELECT g.id AS game_id, g.games_name, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT rg.games_name, c.city_name\nFROM RelevantGames AS rg\nJOIN games_city AS gc ON toString(rg.game_id) = toString(gc.games_id)\nJOIN city AS c ON toString(gc.city_id) = toString(c.id)\nORDER BY rg.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Hey! Can you help me find the names of the top 5 Winter Games that happened in a major city? I'd like to know the names of the games and the cities they were held in. Make sure you get the ones that are closest to my description and just list the top 10 for me!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'happened in a major city') AS ref_vec_0,\n\ngames_with_distance AS (\n    SELECT \n            g.id AS games_id,\n            g.games_name AS games_name,\n            g.season AS season,\n            g.games_year AS games_year,\n            gc.city_id AS city_id,\n            distance(g.games_description_embedding, ref_vec_0) AS distance\n        FROM \n            games g\n        JOIN \n            games_city gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n    games_with_distance.games_name AS games_name,\n    c.city_name AS city_name\nFROM \n    games_with_distance\nJOIN \n    city c ON toString(games_with_distance.city_id) = toString(c.id)\nORDER BY \n    games_with_distance.distance AS distance\nLIMIT 10;"
+  },
+  {
+    "refine": "xxxxxxxxxx",
+    "question": "Seek out the names of cities that resemble shining jewels by the sea, famous for embracing the global tide of international events, alongside the names of games that radiate the warmth of a summer sports festival celebrated worldwide, and medals that embody the glory of supreme athletic achievement. Let me see who stands closest in this grand arena.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A famous coastal city known for hosting international events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Summer sports festival with global participation') AS ref_vec_1,\n    lembed('all-MiniLM-L6-v2', 'A prestigious award given for top-tier athletic achievement') AS ref_vec_2,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nm_filtered AS (\n    SELECT\n        *,\n        distance(medal_description_embedding, ref_vec_2) AS distance\n    FROM medal\n\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n    c.city_name AS city_name,\n    g.games_name AS games_name,\n    m.medal_name AS medal_name,\n    c.distance as city_distance,\n    g.distance as games_distance\n  FROM c_filtered AS c\n  JOIN \n    games_city AS gc ON toString(c.id) = toString(gc.city_id)\n  JOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\n  JOIN \n    competitor_event AS ce ON toString(g.id) = toString(ce.event_id)\n  JOIN m_filtered AS m ON toString(ce.medal_id) = toString(m.id)\n  ORDER BY \n    c.distance AS distance\n  LIMIT 10;"
+  },
+  {
+    "question": "Could you please find the top 5 cities renowned for being bustling metropolises with rich cultural heritage and vibrant economies? I need their IDs, names, descriptions, and how closely they match this description!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'being bustling metropolises with rich cultural heritage and vibrant economies') AS ref_vec_0\n\nSELECT city_name, city_description, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Hey! Can you find me the top 5 cities that are vibrant, full of life, and have a deep cultural background? I'd love to know their names and a bit about them!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'are vibrant, full of life, and have a deep cultural background') AS ref_vec_0\n\nSELECT city_name, city_description, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Please find the ID of the city that best matches the description of being vibrant, with historic landmarks and cultural heritage.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'being vibrant, with historic landmarks and cultural heritage') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Can you find the game's ID and similarity score that best matches the description of \"The Summer Games of 2012\"?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Summer Games of 2012') AS ref_vec_0\n\nSELECT id, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Please list the names of the ten closest city and sports event pairs that match the descriptions of cities hosting international events with beautiful landscapes and major sports events attracting athletes from around the world.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'cities hosting international events with beautiful landscapes and major sports events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'A major sports event attracting athletes worldwide') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nSimilarCities AS (\n    SELECT \n            c.id AS city_id,\n            c.city_name AS city_name,\n            c.distance AS distance\n        FROM c_filtered AS c\n),\n\nSimilarGames AS (\n    SELECT \n            g.id AS game_id,\n            g.games_name AS games_name,\n            g.distance AS distance\n        FROM g_filtered AS g\n)\n\nSELECT \n    sc.city_name AS city_name,\n    sg.games_name AS games_name\nFROM \n    SimilarCities AS sc\nJOIN \n    games_city AS gc ON toString(sc.city_id) = toString(gc.city_id)\nJOIN \n    SimilarGames AS sg ON toString(sg.game_id) = toString(gc.games_id)\nORDER BY \n    sc.distance, sg.distance\nLIMIT 10;"
+  },
+  {
+    "question": "**\nCould you list the names of 10 cities known for their vibrant sporting events and cultural heritage, along with the names of games held there?\n**",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'vibrant sporting events and cultural heritage') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT c.id AS city_id, c.city_name, c.city_description, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city AS c\n    ORDER BY distance\n    LIMIT 5\n),\n\nGamesInCity AS (\n    SELECT g.id AS game_id, g.games_name, g.season, g.games_year, gc.city_id\n      FROM games AS g\n      JOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\n)\n\nSELECT cm.city_name, gic.games_name\nFROM CityMatch AS cm\nJOIN GamesInCity AS gic ON toString(cm.city_id) = toString(gic.city_id)\nORDER BY cm.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Could you tell me the names of the top 5 games that are associated with \"Summer games competition\" and the names of the cities that best fit \"City hosting international games\"? I need these based on the closest matches in terms of similarity.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer games competition') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'City hosting international games') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 10\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 10\n),\n\nGameVectors AS (\n    SELECT g.id AS game_id, g.games_name, gc.city_id, g.distance\n        FROM g_filtered AS g\n        JOIN games_city gc ON toString(g.id) = toString(gc.games_id)\n),\n\nCityVectors AS (\n    SELECT c.id AS city_id, c.city_name, c.distance\n        FROM c_filtered AS c\n)\n\nSELECT gv.games_name, cv.city_name\nFROM GameVectors gv\nJOIN CityVectors cv ON toString(gv.city_id) = toString(cv.city_id)\nORDER BY gv.distance + cv.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Identify the names of the top 2 games that are celebrated during the summer as annual sport festivals, and provide the names of the cities famous for hosting these events.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city famous for hosting the annual sport festival') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Annual sport festival celebrated in summer') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityGames AS (\n    SELECT gc.games_id, c.id AS city_id, c.city_name, c.city_description_embedding, c.distance\n      FROM c_filtered AS c\n      JOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\n      ORDER BY c.distance\n)\n\nSELECT g.games_name, cg.city_name\nFROM g_filtered AS g\nJOIN CityGames AS cg ON toString(g.id) = toString(cg.games_id)\nORDER BY g.distance\nLIMIT 2;"
+  },
+  {
+    "question": "Hey there! Could you find me the top 5 cities where I can explore vibrant culture and historical landmarks? I'd love to know their names and how well they match this idea.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Explore the vibrant culture and historical landmarks of this bustling city') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Which Olympic Games were held in the city that stands as a beacon of being an \"Olympic host city\"?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic host city') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\n      FROM city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name\nFROM games g\nJOIN games_city gc ON toString(gc.games_id) = toString(g.id)\nJOIN CityMatch cm ON toString(cm.id) = toString(gc.city_id)\nORDER BY cm.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Which five cities shine brightest with a tapestry of cultural heritage and modern allure, and could be likened to bustling gems on the horizon?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its cultural heritage and modern attractions') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you tell me the name of the game linked to the city best known for its rich cultural vibrancy?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city renowned for its vibrant cultural heritage') AS ref_vec_0,\n\nRelevantCities AS (\n    SELECT c.id AS city_id, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city AS c\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT g.games_name\nFROM games AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN RelevantCities AS rc ON toString(gc.city_id) = toString(rc.city_id)\nORDER BY rc.distance \nLIMIT 1;"
+  },
+  {
+    "question": "Can you tell me the name of the city most associated with the 2012 Winter Games, which emphasizes snow sports and ice competitions, by finding the top match based on the description similarity?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The 2012 Winter Games held in Vancouver, focusing on snow sports and ice competitions') AS ref_vec_0,\n\nFilteredGames AS (\n    SELECT id, games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\n        FROM games\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT c.city_name\nFROM FilteredGames fg\nJOIN games_city gc ON toString(fg.id) = toString(gc.games_id)\nJOIN city c ON toString(gc.city_id) = toString(c.id)\nORDER BY fg.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Which games were most reminiscent of the summer sporting event in 2012, and what is their closeness in spirit?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer games held in 2012') AS ref_vec_0\n\nSELECT games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you tell me the names of the top 5 games that are described as exciting summer events and the names of the top 10 vibrant cities full of life where these games took place, ordered by their relevance?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Exciting summer event') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'A vibrant city full of life') AS ref_vec_1,\n\ngames_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 10\n),\n\nMatchingGames AS (\n    SELECT id, games_name, games_year, season\n      FROM games_filtered AS games\n)\n\nSELECT c.city_name, mg.games_name\nFROM MatchingGames mg\nJOIN games_city gc ON toString(gc.games_id) = toString(mg.id)\nJOIN c_filtered AS c ON toString(c.id) = toString(gc.city_id)\nORDER BY c.distance;"
+  },
+  {
+    "question": "Could you tell me which city is most recognized for hosting international sports events and is associated with a historic sports event in a global city?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for hosting international sports events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Historic sports event in a global city') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM c_filtered AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY c.distance\nLIMIT 1;"
+  },
+  {
+    "question": "What are the IDs of the top three medals known for their prestigious first-place awards?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The medal awarded for first place is highly prestigious') AS ref_vec_0\n\nSELECT id, distance(medal.medal_description_embedding, ref_vec_0) AS distance\nFROM medal\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Could you find five cities that remind you of Barcelona because of their famous architecture and lively atmosphere? I'd like to know their names and see how closely related they are.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Barcelona is known for its architectural landmarks and vibrant culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "What are the names of the 3 cities hosting the top 5 games related to winter sports and thrilling competitions?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Winter sports and thrilling competitions') AS ref_vec_0,\n\nSimilarGames AS (\n    SELECT g.id AS game_id, g.games_name, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN SimilarGames AS sg ON toString(gc.games_id) = toString(sg.game_id)\nORDER BY sg.distance\nLIMIT 3;"
+  },
+  {
+    "question": "Identify the year, name, and similarity distance of the top three games most relevant to the description of the 1992 Summer Games held in Barcelona, particularly noted for their grand opening ceremony.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The 1992 Summer games held in Barcelona were noted for their grand opening ceremony') AS ref_vec_0\n\nSELECT games_year, games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Which five cities are the jewels of cultural richness and historical vibrancy in our bustling world?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolitan area known for its rich culture and history') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "**  \nCould you tell me the name of the medal that most closely aligns with a \"Bronze medal with no available description\"?  \n**",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Bronze medal with no available description') AS ref_vec_0\n\nSELECT medal_name, distance(medal.medal_description_embedding, ref_vec_0) AS distance \nFROM medal\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "**User**: \"I'm interested in finding out about Olympic Games.\"\n**Assistant**: \"Are you looking for information about games hosted by specific cities?\"\n**User**: \"Yes, specifically those cities that are typically known as Olympic Games host cities.\"\n**Assistant**: \"Alright, how many of these cities would you like us to focus on for finding the games?\"\n**User**: \"I'd like to consider the top 5 cities based on their description as host cities.\"\n**Assistant**: \"Understood. What details would you like about the games hosted in these cities?\"\n**User**: \"I need the names of these Olympic Games.\"\n**Assistant**: \"Great, I'll look up the names of the games hosted in the top 5 cities most associated with being Olympic host cities. Is there anything else you require?\"\n**User**: \"No, that should be all.\"\n**Assistant**: \"Okay, I'll retrieve the names of up to 10 games hosted by these cities, sorted by how closely the cities match that host city profile.\"",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic Games host city') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\n      FROM city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name\nFROM games g\nJOIN games_city gc ON toString(g.id) = toString(gc.games_id)\nJOIN CityMatch cm ON toString(gc.city_id) = toString(cm.id)\nORDER BY cm.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Hey! Can you show me the IDs and similarity scores for the top 5 cities that are really lively and famous for their cultural heritage and modern architecture?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its cultural heritage and modern architecture') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Please identify the city ID for the city known for its many historical landmarks.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city with many historical landmarks') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey there! Can you tell me the names of the top 5 cities that are known for being lively and having historical landmarks?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling urban environment with historical landmarks') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you provide the IDs, names, and similarity distances of the top 3 cities renowned for their vibrant culture and historic architecture?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for its vibrant culture and historic architecture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Could you show me the top 3 games that are associated with cities described as vibrant cultural hubs with historic architecture, focusing on major sporting events hosted in dynamic venues?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The vibrant cultural hub with historic architecture') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Major sporting events hosted in dynamic venues') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nSimilarCities AS (\n    SELECT c.id, c.city_name, c.city_description, c.distance\n      FROM c_filtered AS c\n)\n\nSELECT g.games_name\nFROM SimilarCities sc\nJOIN games_city gc ON toString(sc.id) = toString(gc.city_id)\nJOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY g.distance\nLIMIT 3;"
+  },
+  {
+    "question": "Identify the names of the top three cities that are most relevant to the description of an \"Olympic city with historic landmarks\".",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic city with historic landmarks') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance \nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Can you provide the name of the city that is the best match for being a vibrant coastal city with rich cultural heritage and modern attractions?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant coastal city with rich cultural heritage and modern attractions') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\nFROM city c\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey, could you help me find the top 10 pairs of cities and games that are most famous for their ties to historic Olympics and cultural significance? I'd love to know their names, starting from the most relevant ones!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city renowned for its historic Olympics') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Games are held in historic locations with significant cultural impact') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ncity_match AS (\n    SELECT c.id AS city_id, c.city_name, c.distance\n      FROM c_filtered AS c\n),\n\ngames_match AS (\n    SELECT g.id AS games_id, g.games_name, g.distance\n      FROM g_filtered AS g\n)\n\nSELECT cm.city_name, gm.games_name\nFROM city_match cm\nJOIN games_city gc ON toString(cm.city_id) = toString(gc.city_id)\nJOIN games_match gm ON toString(gc.games_id) = toString(gm.games_id)\nORDER BY cm.distance, gm.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Can you identify the city that best represents the idea of a beautiful coastal city and provide its ID?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'beautiful coastal city') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Could you show me the IDs and names of the top 3 cities known for their vibrant arts scene and historical landmarks?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling city known for its vibrant arts scene and historical landmarks') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Hey! Can you help me find the top 3 cities that are bustling capitals with rich culture and history? I'd like to know their names, please!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling capital known for its rich culture and history') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\nFROM city c\nJOIN games_city gc ON toString(c.id) = toString(gc.city_id)\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Which city is hosting a game that's really close to an event with summer sports competitions?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer sports event with various competitions') AS ref_vec_0,\n\nRecentGames AS (\n    SELECT g.id, g.games_name, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN RecentGames AS rg ON toString(gc.games_id) = toString(rg.id)\nORDER BY rg.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Top 5 cities known for vibrant culture. Give their names and distances.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolitan area known for its vibrant culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you identify the top 10 cities known for hosting historic sports events along with the corresponding international sports competitions with a long history that they hosted, including the games' names, years, and seasons?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling city known for hosting historic sports events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'International sports competition with a long history') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ncity_knn AS (\n    SELECT \n            c.id AS city_id, \n            c.city_name AS city_name, \n            g.id AS games_id, \n            g.games_name AS games_name, \n            c.distance AS city_distance\n        FROM c_filtered AS c\n        JOIN \n            games_city AS gc ON toString(c.id) = toString(gc.city_id)\n        JOIN \n            games AS g ON toString(gc.games_id) = toString(g.id)\n),\n\ngames_knn AS (\n    SELECT \n            g.id AS games_id, \n            g.games_name AS games_name, \n            g.games_year AS games_year, \n            g.season AS season, \n            g.distance AS games_distance\n        FROM g_filtered AS g\n)\n\nSELECT \n    ck.city_name AS city_name, \n    gk.games_name AS games_name, \n    gk.games_year AS games_year, \n    gk.season AS season\nFROM \n    city_knn AS ck\nJOIN \n    games_knn AS gk ON toString(ck.games_id) = toString(gk.games_id)\nORDER BY \n    ck.city_distance, gk.games_distance\nLIMIT 10;"
+  },
+  {
+    "question": "Could you show me the top 5 regions that are most representative of major country's Olympic committees and provide their unique IDs and National Olympic Committee codes?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Olympic committee of a major country') AS ref_vec_0\n\nSELECT id, noc, distance(noc_region.noc_region_description_embedding, ref_vec_0) AS distance\nFROM noc_region\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "**User**: I'm interested in finding some cities.\n**Assistant**: What kind of cities are you looking for?\n**User**: Cities that are vibrant and known for their rich history and cultural landmarks.\n**Assistant**: How many cities would you like to discover?\n**User**: I'd like to find 3 cities.\n**Assistant**: Alright, I'll look for the 3 cities that best match your description. Is there anything specific you need to know about them?\n**User**: Yes, I want to know their names and descriptions.\n**Assistant**: Got it. I'll provide you with the names and descriptions of those 3 cities.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its rich history and cultural landmarks') AS ref_vec_0\n\nSELECT city_name, city_description, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Hey there! Could you find the top 5 cities that are famously known for hosting major sporting events? I'd love to know their names!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The vibrant city known for hosting major sporting events') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you tell me which game resembles that big international sporting event that happens every four years?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A major international multi-sport event held every four years') AS ref_vec_0\n\nSELECT games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey there! Could you find me the top 3 cities famous for hosting big-time Olympic events and tell me which games they hosted? I'm curious about the names of the cities, the games, and how closely they match the criteria.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A historic city known for hosting important Olympic events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Modern Olympics with global participation') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 3\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 2\n)\n\nSELECT c.city_name, g.games_name, c.distance\nFROM c_filtered AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY c.distance;"
+  },
+  {
+    "question": "I want to find the top 5 cities that are famous tourist destinations known for their history and culture. Please provide their IDs and names.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Famous tourist destination known for its history and culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you provide the IDs and names of the top 5 cities that are renowned for their vibrant art and cultural scenes?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its art and culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "List the cities where the top 5 thrilling international athletic events occur.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A thrilling athletic event with international participation') AS ref_vec_0,\n\nSimilarGames AS (\n    SELECT g.id, g.games_name, g.games_year, gc.city_id, distance(g.games_description_embedding, ref_vec_0) AS distance\n        FROM games g\n        JOIN games_city gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM SimilarGames sg\nJOIN city c ON toString(sg.city_id) = toString(c.id)\nORDER BY sg.distance;"
+  },
+  {
+    "question": "Please find the city that best matches the description of being a bustling metropolitan area known for its vibrant cultural scene and historical landmarks, and let me know the name. I need just one city that fits this description best!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolitan city known for its vibrant cultural scene and historical landmarks') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "What are the descriptions and distances of the top 3 cities known for frequently hosting international sports events?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city frequently hosting international sports events') AS ref_vec_0\n\nSELECT c.city_description, distance(c.city_description_embedding, ref_vec_0) AS distance \nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Could you please find the top 5 cities that are famous for their historic architecture and vibrant culture? I need the city names and how closely they match this description!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city known for its historic architecture and vibrant culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you show me the games' names and seasons for the top 3 cities renowned for historical architecture and vibrant culture?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city renowned for its historical architecture and vibrant culture') AS ref_vec_0,\n\nCityVectorSearch AS (\n    SELECT c.id AS city_id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n        FROM city AS c\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT cvs.city_name, g.games_name, g.season\nFROM CityVectorSearch AS cvs\nJOIN games_city AS gc ON toString(cvs.city_id) = toString(gc.city_id)\nJOIN games AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY cvs.distance;"
+  },
+  {
+    "question": "Can you provide the names of five cities known for their cultural diversity and vibrant economy, along with the names of games hosted in them? I am interested in the top matches based on their similarity to a bustling metropolitan area.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolitan area known for its cultural diversity and vibrant economy') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT c.id AS city_id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n        FROM city AS c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT cm.city_name, g.games_name\nFROM CityMatch AS cm\nJOIN games_city AS gc ON toString(cm.city_id) = toString(gc.city_id)\nJOIN games AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY cm.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Hey! Can you find me the game that matches up the best with the vibe of the 2002 Winter Olympics? I'd love to know its name!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Winter Olympics held in 2002') AS ref_vec_0\n\nSELECT games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "In the tapestry of global gatherings, reveal a duo of cities and games that twinkle with the essence of hosting grand international events and spirited sports competitions. Share their names and how closely they dance to this theme.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city known for hosting major international events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'An international sports event with a wide range of competitions') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nsimilar_cities AS (\n    SELECT \n        c.id AS city_id, \n        c.city_name AS city_name, \n        g.id AS games_id,\n        c.distance AS city_distance\n      FROM c_filtered AS c\n      JOIN \n        games_city AS gc ON toString(c.id) = toString(gc.city_id)\n      JOIN \n        games AS g ON toString(gc.games_id) = toString(g.id)\n      ORDER BY \n        c.distance AS distance\n),\n\nsimilar_games AS (\n    SELECT \n        g.id AS games_id,\n        g.games_name AS games_name,\n        g.distance AS games_distance\n      FROM g_filtered AS g\n      ORDER BY \n        g.distance AS distance\n)\n\nSELECT \n  sc.city_name AS city_name, \n  sc.city_distance AS city_distance, \n  sg.games_name AS games_name, \n  sg.games_distance AS games_distance\nFROM \n  similar_cities AS sc\nJOIN \n  similar_games AS sg ON toString(sc.games_id) = toString(sg.games_id)\nLIMIT 10;"
+  },
+  {
+    "question": "**User**: \"I'm interested in finding information about cities and sports events.\"\n**Assistant**: \"Could you specify what kind of cities you're looking for?\"\n**User**: \"I'm looking for historical cities known for hosting major international events.\"\n**Assistant**: \"How many such cities would you like information on?\"\n**User**: \"I'd like to find the top 5 cities.\"\n**Assistant**: \"Got it. Now, what kind of sports events are you interested in?\"\n**User**: \"I'm looking for international sports events that are held in the summer.\"\n**Assistant**: \"And how many of these events would you like to find?\"\n**User**: \"The top 5 as well.\"\n**Assistant**: \"Alright, I will look up the top 5 cities and the top 5 summer international sports events that match your descriptions. These will be ranked by their relevance to your interests. Is there anything else you need?\"\n**User**: \"No, that's all.\"\n**Assistant**: \"Okay, I will help you compile the information, including the names of the cities and events, the year and season of the events, and their relevance scores.\"",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A historical city known for hosting major international events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'An international sports event held in summer') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityMatches AS (\n    SELECT c.id AS city_id, c.city_name, c.distance AS city_distance\n      FROM c_filtered AS c\n),\n\nGamesMatches AS (\n    SELECT g.id AS games_id, g.games_name, g.games_year, g.season, g.distance AS games_distance\n      FROM g_filtered AS g\n)\n\nSELECT cm.city_name, gm.games_name, gm.games_year, gm.season, cm.city_distance, gm.games_distance\nFROM CityMatches cm\nJOIN games_city gc ON toString(cm.city_id) = toString(gc.city_id)\nJOIN GamesMatches gm ON toString(gc.games_id) = toString(gm.games_id)\nORDER BY cm.city_distance, gm.games_distance\nLIMIT 10;"
+  },
+  {
+    "question": "Could you tell me the IDs and similarity distances for the top 5 cities that are described as bustling metropolitan areas known for vibrant culture and historical landmarks?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolitan city known for its vibrant culture and historical landmarks') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "I am looking for the names, descriptions, and distances of the top 5 cities that most closely represent an iconic city known for its rich historical heritage and vibrant culture, ordered by their proximity of match.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'An iconic city known for its rich historical heritage and vibrant culture') AS ref_vec_0\n\nSELECT city_name, city_description, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you tell me the name of a game that is located in one of the top 5 cities known for being vibrant and having historical significance along with modern amenities?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city with historical significance and modern amenities') AS ref_vec_0,\n\nTopCities AS (\n    SELECT c.id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city c\n    ORDER BY distance\n    LIMIT 5\n),\n\nGamesInCities AS (\n    SELECT g.games_name\n      FROM games g\n      JOIN games_city gc ON toString(g.id) = toString(gc.games_id)\n      WHERE gc.city_id IN (SELECT id FROM TopCities)\n)\n\nSELECT g.games_name\nFROM GamesInCities g\nLIMIT 1;"
+  },
+  {
+    "question": "Identify the names of the games that were held in the top 5 cities most suitable for hosting major events, characterized as capital cities.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Capital city hosting major events') AS ref_vec_0,\n\nRelevantCities AS (\n    SELECT c.id, c.city_name, c.city_description, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city AS c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name\nFROM games AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN RelevantCities AS rc ON toString(rc.id) = toString(gc.city_id);"
+  },
+  {
+    "question": "Could you show me the names and seasons of the top 10 games that are linked to the 5 cities most similar to the concept of Paris being a vibrant city with rich culture?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Paris is a vibrant city with rich culture') AS ref_vec_0,\n\nCityMatches AS (\n    SELECT c.id AS city_id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name, g.season\nFROM games g\nJOIN games_city gc ON toString(g.id) = toString(gc.games_id)\nJOIN CityMatches cm ON toString(gc.city_id) = toString(cm.city_id)\nORDER BY cm.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Hey there! Can you find me the top 10 games that are like summer competitions with multiple sports events and are held in cities known for hosting sports events? I'd love to know the names of these games and their cities!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer competition with multiple sports events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'A metropolitan city hosting sports events') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nSimilarGames AS (\n    SELECT\n        g.id AS game_id, \n        g.games_name AS games_name, \n        gc.city_id AS city_id, \n        g.distance AS game_distance\n      FROM g_filtered AS g\n      JOIN\n        games_city gc ON toString(g.id) = toString(gc.games_id)\n),\n\nSimilarCities AS (\n    SELECT\n        c.id AS city_id, \n        c.city_name AS city_name, \n        c.distance AS city_distance\n      FROM c_filtered AS c\n)\n\nSELECT \n  sg.games_name AS games_name, \n  sc.city_name AS city_name\nFROM \n  SimilarGames sg\nJOIN \n  SimilarCities sc ON toString(sg.city_id) = toString(sc.city_id)\nORDER BY \n  sg.game_distance + sc.city_distance\nLIMIT 10;"
+  },
+  {
+    "question": "Identify the top 5 cities renowned for hosting major sporting events and cultural festivals, and return the names of these cities, the games they host, and the similarity distance ranking.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city known for hosting major sporting events and cultural festivals') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\n      FROM city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT cm.city_name, g.games_name, cm.distance\nFROM CityMatch cm\nJOIN games_city gc ON toString(cm.id) = toString(gc.city_id)\nJOIN games g ON toString(gc.games_id) = toString(g.id)\nORDER BY cm.distance;"
+  },
+  {
+    "question": "Hey, can you help me find out the top 5 cities that are most connected to the games with descriptions like \"Summer Games in 2012\"? I'm curious about their names!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer Games in 2012') AS ref_vec_0,\n\nGamesCTE AS (\n    SELECT g.id, g.games_name, g.games_description, gc.city_id, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n      JOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityCTE AS (\n    SELECT c.city_name, c.id, gc.distance\n      FROM city AS c\n      JOIN GamesCTE AS gc ON toString(c.id) = toString(gc.city_id)\n      ORDER BY gc.distance\n      LIMIT 5\n)\n\nSELECT CityCTE.city_name\nFROM CityCTE;"
+  },
+  {
+    "question": "Amidst the whirlwind of thrilling summer sports spectacles, which city stands as the shining beacon where these exhilarating games unfold most vibrantly?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Summer Games with exciting sports events') AS ref_vec_0,\n\nFilteredGames AS (\n    SELECT g.id, g.games_name, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN FilteredGames AS fg ON toString(gc.games_id) = toString(fg.id)\nORDER BY fg.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Find the five regions that resonate most with the spirit of 'USA', and share their names, codes, and how far they stray from this essence.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The NOC code ''''''''USA'''''''' represents the United States') AS ref_vec_0\n\nSELECT noc, region_name, distance(noc_region.noc_region_description_embedding, ref_vec_0) AS distance\nFROM noc_region\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you please find the names of games played in the top 5 cities that best embody the vibrant culture and history of Barcelona? Ensure the list is organized by similarity distance and shows no more than 10 game entries.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Barcelona is a vibrant city known for its rich culture and history') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\n      FROM city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name, c.city_name\nFROM games AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN CityMatch AS c ON toString(gc.city_id) = toString(c.id)\nORDER BY c.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Can you find a few cities that are well-known for hosting major sports events in summer and list the international games held there during the same season?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for hosting major sports events in summer') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'International sporting event held in summer') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name, g.games_name\nFROM c_filtered AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY c.distance, g.distance;"
+  },
+  {
+    "question": "Identify the IDs of the five cities most representative of vibrant culture and historical landmarks.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A major city known for its vibrant culture and historical landmarks') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "**User**: I'm interested in finding some information about the Olympic Games.\n**Assistant**: What specific games are you looking for?\n**User**: I'm particularly interested in games similar to the summer games of 1992.\n**Assistant**: How many of these similar games would you like to explore?\n**User**: I'd like to see details about the top 3 games.\n**Assistant**: What additional details do you need about these games?\n**User**: I'd like to know the cities where these games took place and their names.\n**Assistant**: Do you have any preference for the order of the results?\n**User**: Please order them by relevance or similarity, and limit to 5 results.\n**Assistant**: Understood. I will generate the SQL query to retrieve the top 3 games similar to the summer games of 1992, and show their names along with the names of 5 cities where these games were held, sorted by relevance.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The summer games of 1992') AS ref_vec_0,\n\nGamesCTE AS (\n    SELECT g.id AS games_id, g.games_name, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT c.city_name, gcte.games_name\nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN GamesCTE AS gcte ON toString(gc.games_id) = toString(gcte.games_id)\nORDER BY gcte.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you find the names of the cities that host the top 5 games most related to a thrilling sporting event in a vibrant city known for its culture and history? Please list the cities in order of their games' relevance to this description.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A thrilling sporting event held in a vibrant city known for its culture and history') AS ref_vec_0,\n\nGamesCTE AS (\n    SELECT g.id, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM GamesCTE AS gc\nJOIN games_city AS gc_mapping ON toString(gc.id) = toString(gc_mapping.games_id)\nJOIN city AS c ON toString(gc_mapping.city_id) = toString(c.id)\nORDER BY gc.distance;"
+  },
+  {
+    "question": "**User**: I'm interested in finding some city-related data.\n**Assistant**: Could you tell me what specific information you're looking for about these cities?\n**User**: I'm looking for cities known for hosting international events with historical significance.\n**Assistant**: How many such cities are you interested in discovering?\n**User**: I'd like the top 5 cities that fit this description.\n**Assistant**: All right. Along with city names, would you like information about any events associated with these cities?\n**User**: Yes, I'd like to know about major sports events held in these cities.\n**Assistant**: How many sporting events should I look for in these cities?\n**User**: Please find the top 5 events for each of these cities.\n**Assistant**: Got it. I will prepare a query that identifies the top 5 cities known for international events and the top 5 sports events associated with those cities.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A historical city known for international events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Major sports events held in a renowned city') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name, g.games_name\nFROM c_filtered AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN g_filtered AS g ON toString(g.id) = toString(gc.games_id);"
+  },
+  {
+    "question": "Hey, can you find me the top 5 games that are all about summer vibes and let me know which cities they happen in? I'm curious about the descriptions too!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'games occurring in the summer') AS ref_vec_0,\n\nGameSearch AS (\n    SELECT \n        g.id AS games_id, \n        g.games_description AS games_description, \n        distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM \n        games g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n  c.city_name AS city_name, \n  gs.games_description AS games_description\nFROM \n  city c\nJOIN \n  games_city gc ON toString(c.id) = toString(gc.city_id)\nJOIN \n  GameSearch gs ON toString(gc.games_id) = toString(gs.games_id)\nORDER BY \n  gs.distance;"
+  },
+  {
+    "question": "Identify the game most closely associated with Olympic events featuring exciting sports, and provide its identifier and similarity measure.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic games with exciting sporting events') AS ref_vec_0\n\nSELECT id, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "What is the ID of the region that aligns most closely with the idea of a national governing sports body and has connections to some of those older competitors?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The United States Olympic Committee is a national governing body for sports') AS ref_vec_0,\n\nCompetitorData AS (\n    SELECT gc.id as competitor_id, gc.person_id, p.full_name, p.gender\n        FROM games_competitor gc\n        JOIN person p ON toString(gc.person_id) = toString(p.id)\n        WHERE gc.age > 20\n),\n\nSimilarRegions AS (\n    SELECT nr.id, nr.noc, nr.region_name, nr.noc_region_description, distance(nr.noc_region_description_embedding, ref_vec_0) AS distance\n        FROM noc_region nr\n    ORDER BY distance\n    LIMIT 1\n)\n\nSELECT sr.id\nFROM SimilarRegions sr\nJOIN person_region pr ON toString(sr.id) = toString(pr.region_id)\nJOIN CompetitorData cd ON toString(pr.person_id) = toString(cd.person_id)\nORDER BY sr.distance;"
+  },
+  {
+    "question": "What are the IDs, NOC codes, names, and distances of the top 3 regions that are most closely related to the concept of being represented by the NOC code for Afghanistan?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The region represented by the NOC code is Afghanistan') AS ref_vec_0\n\nSELECT id, noc, region_name, distance(noc_region.noc_region_description_embedding, ref_vec_0) AS distance\nFROM noc_region\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Can you provide the names of the top 10 games held in the five cities most associated with Barcelona's historic architecture and art, sorted by city name and season?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Barcelona historic architecture and art') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT \n        c.id AS city_id,\n        c.city_name AS city_name,\n        distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city AS c\n    ORDER BY distance\n    LIMIT 5\n),\n\nGamesInCity AS (\n    SELECT \n        gc.games_id AS games_id,\n        gm.games_name AS games_name,\n        gm.season AS season,\n        cm.city_name AS city_name\n      FROM games_city AS gc\n      JOIN games AS gm ON toString(gc.games_id) = toString(gm.id)\n      JOIN CityMatch AS cm ON toString(gc.city_id) = toString(cm.city_id)\n)\n\nSELECT \n  gi.games_name AS games_name\nFROM GamesInCity AS gi\nORDER BY gi.city_name, gi.season\nLIMIT 10;"
+  },
+  {
+    "question": "Hey, can you help me find the cities that are famous for hosting big events and also have top summer games with high attendance taking place there? Let me know the names of those cities!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Games held in the summer with high attendance') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Cities known for hosting large events') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nTopGames AS (\n    SELECT g.id as game_id, g.games_name, g.distance\n      FROM g_filtered AS g\n      ORDER BY g.distance\n),\n\nTopCities AS (\n    SELECT c.id as city_id, c.city_name, c.distance\n      FROM c_filtered AS c\n      ORDER BY c.distance\n)\n\nSELECT tc.city_name\nFROM TopGames tg\nJOIN games_city gc ON toString(tg.game_id) = toString(gc.games_id)\nJOIN TopCities tc ON toString(gc.city_id) = toString(tc.city_id);"
+  },
+  {
+    "question": "Hey there! Could you find me the top 5 cities known for their awesome modern architecture and cultural heritage? And while you're at it, I want to know the names of games associated with these cities—just grab the top 10.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its modern architecture and cultural heritage') AS ref_vec_0,\n\nSimilarCities AS (\n    SELECT \n          c.id AS city_id,\n          c.city_name AS city_name,\n          distance(c.city_description_embedding, ref_vec_0) AS distance \n        FROM \n          city c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n  sc.city_name AS city_name,\n  g.games_name AS games_name,\n  sc.distance AS distance \nFROM \n  SimilarCities sc\nJOIN \n  games_city gc ON toString(sc.city_id) = toString(gc.city_id)\nJOIN \n  games g ON toString(gc.games_id) = toString(g.id)\nORDER BY \n  sc.distance AS distance \nLIMIT 10;"
+  },
+  {
+    "question": "What is the name of the game linked to the top city that matches the description of being vibrant with historical landmarks and cultural significance?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city with historical landmarks and cultural significance') AS ref_vec_0,\n\nSimilarCities AS (\n    SELECT c.id AS city_id, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name\nFROM SimilarCities sc\nJOIN games_city gc ON toString(sc.city_id) = toString(gc.city_id)\nJOIN games g ON toString(gc.games_id) = toString(g.id)\nORDER BY sc.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Can you provide the IDs and city names of the top 5 games that are most similar to the \"Summer Games of 1992\", along with their associated similarity distances?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer Games of 1992') AS ref_vec_0,\n\nFilteredGames AS (\n    SELECT g.id AS game_id, g.games_name, gc.city_id, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games g\n      JOIN games_city gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT fg.game_id, c.city_name, fg.distance\nFROM FilteredGames fg\nJOIN city c ON toString(fg.city_id) = toString(c.id)\nORDER BY fg.distance;"
+  },
+  {
+    "question": "Hey there! I'm really curious, could you help me find the top 5 games that have a vibe similar to memorable Summer Olympic events? I'd love to know what year they happened, their names, seasons, and a bit about them. Thanks!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer Olympic games with memorable events') AS ref_vec_0\n\nSELECT \n  g.id AS id, \n  g.games_year AS games_year, \n  g.games_name AS games_name, \n  g.season AS season, \n  g.games_description AS games_description, \n  distance(g.games_description_embedding, ref_vec_0) AS distance\nFROM \n  games g\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "I need to find the game that best matches the description of the Summer Olympic Games held in 2021, focusing on innovations in sport technology, and provide its ID, name, and similarity score.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Summer Olympic Games held in 2021 featured innovations in sport technology') AS ref_vec_0\n\nSELECT id, games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey there! Could you find the top 5 games that represent a global sporting event with high participation? I'd love to know which historic cities with major international events host these games. Make sure to list them starting with the city closest to the concept.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Historic city with major international events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Global sporting event known for high participation') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityMatches AS (\n    SELECT \n            c.id AS city_id,\n            c.city_name AS city_name,\n            c.distance AS city_distance\n        FROM c_filtered AS c\n)\n\nSELECT \n    g.games_name AS games_name,\n    cm.city_name AS city_name\nFROM g_filtered AS g\nJOIN \n    games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN \n    CityMatches AS cm ON toString(gc.city_id) = toString(cm.city_id)\nORDER BY \n    cm.city_distance;"
+  },
+  {
+    "question": "Find the IDs of the top 5 games that are related to winter sports events with snowy landscapes.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Winter sports event with snowy landscapes') AS ref_vec_0\n\nSELECT games.id, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "I would like to know the names of games that have been held in cities described as historical and known for hosting international events. Please provide the top 10 game names and their corresponding city names, focusing on the cities most relevant to this description.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A historical city known for hosting international events') AS ref_vec_0,\n\nCityMatches AS (\n    SELECT \n            id AS city_id, \n            city_name,\n            distance(city.city_description_embedding, ref_vec_0) AS distance\n        FROM \n            city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n    g.games_name AS games_name, \n    c.city_name AS city_name\nFROM \n    games g\nJOIN \n    games_city gc ON toString(g.id) = toString(gc.games_id)\nJOIN \n    CityMatches c ON toString(gc.city_id) = toString(c.city_id)\nORDER BY \n    c.distance AS distance\nLIMIT 10;"
+  },
+  {
+    "question": "Identify the names of the top 5 cities renowned for their historical significance and cultural heritage, and list them in order of relevance.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for its historical significance and cultural heritage') AS ref_vec_0,\n\nCityVectorSearch AS (\n    SELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT cvs.city_name\nFROM CityVectorSearch cvs\nORDER BY cvs.distance;"
+  },
+  {
+    "question": "Hey there! Could you find me the top 5 cities that are all about being vibrant with awesome history and culture? And then tell me what games were held there and what medals were won, in order of how closely they match this vibe!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city with a rich history and culture') AS ref_vec_0,\n\nSimilarCities AS (\n    SELECT \n            c.id AS city_id, \n            c.city_name AS city_name, \n            distance(c.city_description_embedding, ref_vec_0) AS distance\n        FROM \n            city AS c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT\n    sc.city_name AS city_name,\n    g.games_name AS games_name,\n    m.medal_name AS medal_name,\n    sc.distance AS distance\nFROM\n    SimilarCities AS sc\nJOIN\n    games_city AS gc ON toString(sc.city_id) = toString(gc.city_id)\nJOIN\n    games AS g ON toString(gc.games_id) = toString(g.id)\nJOIN\n    competitor_event AS ce ON toString(g.id) = toString(ce.event_id)\nJOIN\n    medal AS m ON toString(ce.medal_id) = toString(m.id)\nORDER BY\n    sc.distance;"
+  },
+  {
+    "question": "What are the cities associated with the top 3 games related to the 2024 Summer Olympics' athletic performances?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Summer Olympics of 2024 showcased remarkable athletic performances globally') AS ref_vec_0,\n\nSimilarGames AS (\n    SELECT \n            g.id AS game_id, \n            distance(g.games_description_embedding, ref_vec_0) AS distance \n        FROM \n            games g\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT \n    c.city_name AS city_name \nFROM \n    SimilarGames sg\nJOIN \n    games_city gc \nON toString(sg.game_id) = toString(gc.games_id)\nJOIN \n    city c \nON toString(gc.city_id) = toString(c.id)\nORDER BY \n    sg.distance;"
+  },
+  {
+    "question": "What are the names and years of the top 5 Olympic games held in the 3 cities most known for their rich history and Olympic games?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its rich history and Olympic games') AS ref_vec_0,\n\nCitySearch AS (\n    SELECT c.id AS city_id, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city c\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT g.games_name, g.games_year\nFROM games g\nJOIN games_city gc ON toString(g.id) = toString(gc.games_id)\nJOIN CitySearch cs ON toString(gc.city_id) = toString(cs.city_id)\nORDER BY cs.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Please provide the ID and similarity distance for the medal that best represents an award given to top athletes.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'An award given to top athletes') AS ref_vec_0\n\nSELECT id, distance(medal.medal_description_embedding, ref_vec_0) AS distance\nFROM medal\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Please find and list the names of the top 5 cities known for their vibrant culture and historic landmarks, sorted by their similarity to this description.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The bustling metropolis is known for its vibrant culture and historic landmarks') AS ref_vec_0,\n\nCitySearch AS (\n    SELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\n      FROM city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT city_name\nFROM CitySearch\nORDER BY distance;"
+  },
+  {
+    "question": "Could you please identify the top 3 cities renowned for hosting international events, and that have been venues for games similar to Olympic summer games? I need their names, ordered by relevance.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Olympic Games in the summer') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'A prominent city known for hosting international events') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 3\n),\n\nrelevant_games AS (\n    SELECT g.id AS game_id\n      FROM g_filtered AS g\n)\n\nSELECT c.city_name\nFROM c_filtered AS c\nJOIN games_city gc ON toString(c.id) = toString(gc.city_id)\nJOIN relevant_games rg ON toString(rg.game_id) = toString(gc.games_id)\nORDER BY c.distance;"
+  },
+  {
+    "question": "Can you find a few games that remind you of the summer Olympics, and do you know which cities they might be linked to, especially those famous for hosting big international things?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Olympic games held in summer') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'A city known for hosting international events') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name, c.city_name\nFROM g_filtered AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN c_filtered AS c ON toString(gc.city_id) = toString(c.id)\nORDER BY g.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Can you provide the names and descriptions of the top 3 cities renowned for their vibrant culture and historical landmarks?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling city known for its vibrant culture and historical landmarks') AS ref_vec_0\n\nSELECT city_name, city_description, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Hey there! Could you let me know which cities and games are considered the top 5 when it comes to hosting major sporting events? I'm curious about the international competitions happening in those cities. Thanks!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Major city known for hosting sporting events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'International sports competition') AS ref_vec_1,\n\ncity_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ngames_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityVectorSearch AS (\n    SELECT city_name, distance\n      FROM city_filtered AS city\n),\n\nGamesVectorSearch AS (\n    SELECT id, games_name, distance\n      FROM games_filtered AS games\n)\n\nSELECT c.city_name, g.games_name\nFROM CityVectorSearch c\nJOIN games_city gc ON toString(c.id) = toString(gc.city_id)\nJOIN GamesVectorSearch g ON toString(gc.games_id) = toString(g.id)\nORDER BY c.distance, g.distance;"
+  },
+  {
+    "question": "Please provide the names of the top 10 games that are most closely related to \"Summer sports event with various athletic competitions\", along with the names of the cities they are associated with.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Summer sports event with various athletic competitions') AS ref_vec_0,\n\nRelevantGames AS (\n    SELECT \n            g.id AS game_id,\n            g.games_name AS games_name,\n            gc.city_id AS city_id,\n            distance(g.games_description_embedding, ref_vec_0) AS distance\n        FROM \n            games g\n        JOIN \n            games_city gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n    rg.games_name AS games_name, \n    c.city_name AS city_name\nFROM \n    RelevantGames rg\nJOIN \n    city c ON toString(rg.city_id) = toString(c.id)\nORDER BY \n    rg.distance AS distance\nLIMIT 10;"
+  },
+  {
+    "question": "Return the names of the top 5 games held in cities most similar to \"A bustling metropolitan area known for its sports events.\"",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolitan area known for its sports events') AS ref_vec_0,\n\nSimilarCities AS (\n    SELECT c.id AS city_id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n      FROM city AS c\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT g.games_name\nFROM games AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN SimilarCities AS sc ON toString(gc.city_id) = toString(sc.city_id)\nORDER BY sc.distance  \nLIMIT 5;"
+  },
+  {
+    "question": "Could you identify the games released after 2000 that are associated with the top 3 cities characterized by a modern urban landscape, and list these games and cities ordered by their relevance to this concept?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'modern urban landscape') AS ref_vec_0,\n\nRecentGames AS (\n    SELECT g.id, g.games_name, g.games_description\n        FROM games AS g\n        WHERE g.games_year > 2000\n),\n\nCityVectorSearch AS (\n    SELECT c.id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n        FROM city AS c\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT rg.games_name, cvs.city_name\nFROM RecentGames AS rg\nJOIN games_city AS gc ON toString(rg.id) = toString(gc.games_id)\nJOIN CityVectorSearch AS cvs ON toString(gc.city_id) = toString(cvs.id)\nORDER BY cvs.distance;"
+  },
+  {
+    "question": "What are the names of the games associated with the top 5 cities known for their historical landmarks and cultural significance?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city is known for its historical landmarks and cultural significance') AS ref_vec_0,\n\nsimilar_cities AS (\n    SELECT c.id AS city_id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n        FROM city c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name, sc.city_name\nFROM similar_cities sc\nJOIN games_city gc ON toString(sc.city_id) = toString(gc.city_id)\nJOIN games g ON toString(gc.games_id) = toString(g.id)\nORDER BY sc.distance;"
+  },
+  {
+    "question": "Identify the city that is recognized for having a vibrant culture and historical significance, and provide its ID and the similarity distance score.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for its vibrant culture and historical significance') AS ref_vec_0\n\nSELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "**User**: I'm interested in finding some cities.\n**Assistant**: What kind of cities are you looking for?\n**User**: Cities that have hosted significant historical events.\n**Assistant**: That's interesting! Are there any specific events or criteria you're considering?\n**User**: I'm thinking of cities that were involved in major sports competitions over the last decade.\n**Assistant**: I see. How many cities are you interested in, and should they be the top choices based on certain descriptions?\n**User**: I'd like to find the top 10 cities based on those criteria.\n**Assistant**: I'll help you find the top 10 cities that have hosted significant historical events and are related to sports competitions over the past decade, using the most relevant descriptions available.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A major city that has hosted historical events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Sport competitions held in the past decade') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name\nFROM c_filtered AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nJOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\nORDER BY c.distance, g.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Hey! Can you help me find the top 5 games that really capture the thrilling vibe of competitive sports and let me know which cities they're associated with?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The thrilling atmosphere of competitive sports') AS ref_vec_0,\n\nSimilarGames AS (\n    SELECT \n        g.id AS game_id,\n        g.games_name AS games_name,\n        gc.city_id AS city_id,\n        distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM \n        games g\n      JOIN \n        games_city gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT \n  sg.games_name AS games_name, \n  c.city_name AS city_name\nFROM \n  SimilarGames sg\nJOIN \n  city c ON toString(sg.city_id) = toString(c.id)\nORDER BY \n  sg.distance AS distance\nLIMIT 5;"
+  },
+  {
+    "question": "Can you tell me which games and cities are closely related to big summer sports events and famous sports-hosting cities? List some that stand out.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'An international sports event held in the summer') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'A major city known for hosting sports events') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nGameCitySimilarity AS (\n    SELECT \n            g.games_name AS games_name,\n            c.city_name AS city_name,\n            g.distance AS g_distance,\n            c.distance AS c_distance\n        FROM g_filtered AS g\n        JOIN \n            games_city AS gc ON toString(g.id) = toString(gc.games_id)\n        JOIN c_filtered AS c ON toString(gc.city_id) = toString(c.id)\n)\n\nSELECT \n    games_name,\n    city_name\nFROM \n    GameCitySimilarity\nORDER BY \n    g_distance + c_distance\nLIMIT 10;"
+  },
+  {
+    "question": "Find the city name of the most relevant city described as a bustling metropolis with an iconic skyline and vibrant culture.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolis known for its iconic skyline and vibrant culture') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\nFROM city c\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Which city hosts the game that is most closely aligned with the idea of an exciting international athletic competition, considering the top 5 games based on their description and returning the city associated with the most similar game?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'An exciting international athletic competition') AS ref_vec_0,\n\nSimilarGames AS (\n    SELECT\n        g.id AS game_id,\n        distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT\n  c.city_name AS city_name\nFROM city c\nJOIN games_city gc ON toString(c.id) = toString(gc.city_id)\nJOIN SimilarGames sg ON toString(gc.games_id) = toString(sg.game_id)\nORDER BY sg.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Could you please locate the 5 cities where the top games, most related to the Summer Games held in 2012, took place? I need their names and the descriptions of these games, ordered by how closely they match the 2012 Summer Games description!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Summer Games held in 2012') AS ref_vec_0,\n\nFilteredGames AS (\n    SELECT g.id, g.games_description, distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM games AS g\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT c.city_name, fg.games_description\nFROM FilteredGames AS fg\nJOIN games_city gc ON toString(fg.id) = toString(gc.games_id)\nJOIN city c ON toString(gc.city_id) = toString(c.id)\nORDER BY fg.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Embark on a journey to discover five cities that shine with historical significance and a rich tapestry of cultural heritage. What are their names, and how far does their light reach in terms of distance?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for its historical significance and cultural heritage') AS ref_vec_0\n\nSELECT c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\nFROM city AS c\nJOIN games_city AS gc ON toString(c.id) = toString(gc.city_id)\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "I am interested in identifying the names of cities and the medals they have awarded that are linked to top global sports events recognized for excellence. Specifically, I'm looking for the top 10 entries sorted by the distance associated with these games. Can you provide this information?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'City known for hosting sports events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'World-renowned sports event') AS ref_vec_1,\n    lembed('all-MiniLM-L6-v2', 'Award for excellence in sports') AS ref_vec_2,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nm_filtered AS (\n    SELECT\n        *,\n        distance(medal_description_embedding, ref_vec_2) AS distance\n    FROM medal\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityGameMedals AS (\n    SELECT\n        c.city_name AS city_name,\n        g.games_name AS games_name,\n        m.medal_name AS medal_name,\n        g.distance AS games_distance\n      FROM c_filtered AS c\n      JOIN games_city gc ON toString(c.id) = toString(gc.city_id)\n      JOIN g_filtered AS g ON toString(gc.games_id) = toString(g.id)\n      JOIN competitor_event ce ON toString(ce.competitor_id) = toString(g.id)\n      JOIN m_filtered AS m ON toString(ce.medal_id) = toString(m.id)\n      ORDER BY g.distance\n)\n\nSELECT city_name, medal_name\nFROM CityGameMedals\nORDER BY games_distance\nLIMIT 10;"
+  },
+  {
+    "question": "Could you show me the top city that best embodies the characteristics of Paris, known for its iconic landmarks and romantic atmosphere?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Paris is known for its iconic landmarks and romantic atmosphere') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\n WHERE city_name != 'Paris'\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Hey there! Could you help me find the top 5 regions that are famous for their historical Olympic achievements? I'm curious about their IDs!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The region known for its historical Olympic achievements') AS ref_vec_0\n\nSELECT id, distance(noc_region.noc_region_description_embedding, ref_vec_0) AS distance\nFROM noc_region\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "What is the ID, name, and distance of the city that is best known for hosting grand sports events and cultural diversity?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The city known for hosting grand sports events and cultural diversity') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Identify the name of the game that is hosted in a city most aligned with the description of being vibrant, rich in culture, and historically significant. Limit the search to the top five cities matching this description and select the game associated with the city having the closest match.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its rich culture and historical significance') AS ref_vec_0,\n\nCityMatch AS (\n    SELECT id, distance(city.city_description_embedding, ref_vec_0) AS distance\n      FROM city\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT g.games_name\nFROM games g\nJOIN games_city gc ON toString(g.id) = toString(gc.games_id)\nJOIN CityMatch cm ON toString(gc.city_id) = toString(cm.id)\nORDER BY cm.distance\nLIMIT 1;"
+  },
+  {
+    "question": "In the realm where the summer sun dances with majestic ceremonies, seek out the cities that have witnessed such spectacular games. Which are the cities that have embraced the top 5 games akin to the grand Olympic festivities?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Olympic games held in summer with spectacular opening ceremonies') AS ref_vec_0,\n\nSimilarGames AS (\n    SELECT g.id AS games_id, g.games_description, gc.city_id, distance(g.games_description_embedding, ref_vec_0) AS distance\n        FROM games AS g\n        JOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 5\n),\n\nCityHosting AS (\n    SELECT c.city_name, sg.games_description, sg.distance\n        FROM city AS c\n        JOIN SimilarGames AS sg ON toString(c.id) = toString(sg.city_id)\n        ORDER BY sg.distance\n        LIMIT 5\n)\n\nSELECT city_name\nFROM CityHosting;"
+  },
+  {
+    "question": "Could you show me the ID and name of the game that most closely relates to the theme of a vibrant city hosting the Summer Games?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The Summer Games were held in a vibrant city') AS ref_vec_0\n\nSELECT id, games_name, distance(games.games_description_embedding, ref_vec_0) AS distance\nFROM games\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Can you identify a few cities and games that might relate to a London feel and summer fun? Let's focus on their names and how they pair up.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'London description example') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Summer games example') AS ref_vec_1,\n\ncity_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ngames_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nFilteredCities AS (\n    SELECT id AS city_id, city_name, distance AS city_distance\n      FROM city_filtered AS city\n),\n\nFilteredGames AS (\n    SELECT id AS games_id, games_name, distance AS games_distance\n      FROM games_filtered AS games\n)\n\nSELECT c.city_name, g.games_name, c.city_distance + g.games_distance AS total_distance\nFROM FilteredCities c\nJOIN games_city gc ON toString(c.city_id) = toString(gc.city_id)\nJOIN FilteredGames g ON toString(gc.games_id) = toString(g.games_id)\nORDER BY total_distance\nLIMIT 10;"
+  },
+  {
+    "question": "Identify the city that is both a major metropolitan area known for hosting global events and closely associated with international sports competitions held in the summer. Please provide the ID of this city.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'International sports competition held in the summer') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'Major metropolitan area known for hosting global events') AS ref_vec_1,\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\nNearestGames AS (\n    SELECT g.id AS games_id, g.games_name, g.games_year, g.season, g.distance\n      FROM g_filtered AS g\n      ORDER BY g.distance\n),\n\nGamesCities AS (\n    SELECT gc.city_id\n      FROM games_city gc\n      JOIN NearestGames ng ON toString(gc.games_id) = toString(ng.games_id)\n),\n\nNearestCities AS (\n    SELECT c.id AS city_id, c.city_name, c.distance\n      FROM c_filtered AS c\n      ORDER BY c.distance\n)\n\nSELECT nc.city_id\nFROM NearestCities nc\nJOIN GamesCities gc ON toString(nc.city_id) = toString(gc.city_id)\nORDER BY nc.distance\nLIMIT 1;"
+  },
+  {
+    "question": "Find the top game related to a historic sporting event with modern international participation.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'historic sporting event in modern times with international participation') AS ref_vec_0,\n\nRelevantGames AS (\n    SELECT \n        g.id AS game_id,\n        g.games_name AS games_name,\n        gc.city_id AS city_id,\n        distance(g.games_description_embedding, ref_vec_0) AS distance\n      FROM \n        games g\n      JOIN \n        games_city gc ON toString(g.id) = toString(gc.games_id)\n    ORDER BY distance\n    LIMIT 3\n)\n\nSELECT \n  rg.games_name AS games_name\nFROM \n  RelevantGames rg\nJOIN \n  city c ON toString(rg.city_id) = toString(c.id)\nORDER BY \n  rg.distance AS distance\nLIMIT 1;"
+  },
+  {
+    "question": "Reveal the identities and names of five cities that dance in the vibrant symphony of culture and history, closest to the heart of such bustling brilliance.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'The bustling city known for its vibrant culture and rich history') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you please find the top 5 vibrant coastal cities known for their cultural heritage and list the names and distances of the top 2 international multi-sport events celebrated every four years, associated with these cities?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant coastal city known for its cultural heritage') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'An international multi-sport event celebrated every four years') AS ref_vec_1,\n\nc_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_0) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 5\n),\n\ng_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_1) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 4\n),\n\nCityCTE AS (\n    SELECT c.id AS city_id, c.city_name, c.distance AS city_distance\n      FROM c_filtered AS c\n)\n\nSELECT g.games_name, g.distance AS games_distance\nFROM g_filtered AS g\nJOIN games_city AS gc ON toString(g.id) = toString(gc.games_id)\nJOIN CityCTE ON toString(CityCTE.city_id) = toString(gc.city_id)\nORDER BY g.distance\nLIMIT 2;"
+  },
+  {
+    "question": "Hey there! Could you list out the top 5 cities that are famous for their cultural heritage and modern architecture? I need to know their IDs, names, and how close they are to this description.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A vibrant city known for its cultural heritage and modern architecture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance \nFROM city\nORDER BY distance\nLIMIT 5;"
+  },
+  {
+    "question": "**User**: I'm interested in finding some cities to visit.\n**Assistant**: What kind of cities are you looking for?\n**User**: I'm looking for cities that are bustling and have a lot of culture and historical sites.\n**Assistant**: How many such cities would you like to find?\n**User**: Three would be perfect.\n**Assistant**: Great! I will find the top three cities that are known for being vibrant, cultural, and historical.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A bustling metropolis known for its vibrant culture and history') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "I would like to know the name of the city that best embodies the characteristics of Barcelona, being known for its vibrant atmosphere, architecture, and culture.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Barcelona is a vibrant city known for its architecture and culture') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 1;"
+  },
+  {
+    "question": "Identify the top 3 cities renowned for their vibrant culture and historical landmarks, and provide their names along with their similarity distances.",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A city known for its vibrant culture and historical landmarks') AS ref_vec_0\n\nSELECT city_name, distance(city.city_description_embedding, ref_vec_0) AS distance\nFROM city\nORDER BY distance\nLIMIT 3;"
+  },
+  {
+    "question": "Could you show me the names of the games held in the year 2000 and the top 5 cities, similar to Sydney with its iconic Opera House and vibrant cultural scene, where these games took place?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'Sydney is known for its iconic Opera House and vibrant cultural scene') AS ref_vec_0,\n\nGamesInYear AS (\n    SELECT g.id AS games_id, g.games_name, g.games_year, gc.city_id\n        FROM games g\n        JOIN games_city gc ON toString(g.id) = toString(gc.games_id)\n        WHERE g.games_year = 2000\n),\n\nCitySimilarity AS (\n    SELECT c.id AS city_id, c.city_name, distance(c.city_description_embedding, ref_vec_0) AS distance\n        FROM city c\n    ORDER BY distance\n    LIMIT 5\n)\n\nSELECT ci.city_name, gsy.games_name\nFROM GamesInYear gsy\nJOIN CitySimilarity ci ON toString(gsy.city_id) = toString(ci.city_id)\nORDER BY ci.distance\nLIMIT 5;"
+  },
+  {
+    "question": "Could you identify and list the names of 10 games most related to winter sports events and the names of 10 cities most related to European capitals, then show me the paired game and city names sorted by how closely they match these topics?",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'winter sports events') AS ref_vec_0,\n    lembed('all-MiniLM-L6-v2', 'European capitals') AS ref_vec_1,\n\ngames_filtered AS (\n    SELECT\n        *,\n        distance(games_description_embedding, ref_vec_0) AS distance\n    FROM games\n\n    ORDER BY distance\n    LIMIT 10\n),\n\ncity_filtered AS (\n    SELECT\n        *,\n        distance(city_description_embedding, ref_vec_1) AS distance\n    FROM city\n\n    ORDER BY distance\n    LIMIT 10\n),\n\nsimilar_games AS (\n    SELECT id, games_name, distance\n        FROM games_filtered AS games\n),\n\nsimilar_cities AS (\n    SELECT city_name, distance\n        FROM city_filtered AS city\n)\n\nSELECT g.games_name, c.city_name\nFROM similar_games g\nJOIN games_city gc ON toString(g.id) = toString(gc.games_id)\nJOIN similar_cities c ON toString(gc.city_id) = toString(c.id)\nORDER BY g.distance, c.distance\nLIMIT 10;"
+  },
+  {
+    "question": "Hey! Could you help me find the top 3 cities that are famous for hosting international sporting events? I need their names!",
+    "sql": "WITH\n    lembed('all-MiniLM-L6-v2', 'A major city known for hosting international sporting events') AS ref_vec_0\n\nSELECT ci.city_name, distance(ci.city_description_embedding, ref_vec_0) AS distance\nFROM city AS ci\nORDER BY distance\nLIMIT 3;"
+  }
+]
