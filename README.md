@@ -6,7 +6,7 @@ MCP-VectorSQL is a powerful vector SQL generation tool that converts natural lan
 
 ## Architecture
 
-![Text2VectorSQL Evaluation Process](./benchmark/figures/mcp_vector_sql.png)
+![Text2VectorSQL Evaluation Process](./benchmark/figures/Architecture.png)
 
 The architecture consists of three main components:
 
